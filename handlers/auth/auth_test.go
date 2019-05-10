@@ -69,6 +69,7 @@ func (ts *AuthTestSuite) TestRegister() {
 	}
 
 	ts.userRepoMock.AssertCalled(ts.T(), "Register", "john@doe.com", "password123")
+	ts.userRepoMock.AssertNotCalled(ts.T(), "Register", "a@b.c", "p")
 }
 
 func (ts *AuthTestSuite) TeardownTest() {
