@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"tpo-lp4/sum"
+
+	"bitbucket.org/aj5110/tpo-lp4/sum"
 )
 
 func main() {
