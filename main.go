@@ -1,11 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"net/http"
 
-	"bitbucket.org/aj5110/tpo-lp4/sum"
+	"bitbucket.org/aj5110/tpo-lp4/handlers/auth"
 )
 
 func main() {
-	fmt.Println("1 + 2 =", sum.Sum(1, 2))
+	auth.Routes()
+
+	http.ListenAndServe(":8080", nil)
 }
