@@ -13,6 +13,10 @@ func NewTodoService(todoRepo repositories.ITodoRepo) *TodoService {
 	return &TodoService{todoRepo}
 }
 
+func (s *TodoService) List() ([]entities.Todo, error) {
+	return s.todoRepo.List()
+}
+
 func (s *TodoService) Add(t *entities.Todo) error {
 	return s.todoRepo.Add(t)
 }

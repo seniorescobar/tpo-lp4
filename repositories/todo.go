@@ -9,6 +9,7 @@ import (
 )
 
 type ITodoRepo interface {
+	List() ([]entities.Todo, error)
 	Add(t *entities.Todo) error
 }
 
@@ -20,8 +21,13 @@ func NewTodoRepo(db *sql.DB) *TodoRepo {
 	return &TodoRepo{db}
 }
 
+func (r *TodoRepo) List() ([]entities.Todo, error) {
+	log.Println("list")
+	return nil, nil
+}
+
 func (r *TodoRepo) Add(t *entities.Todo) error {
-	log.Println("adding", *t)
+	log.Println("add", *t)
 	return nil
 }
 
@@ -33,6 +39,11 @@ type TodoRepoMock struct {
 
 func NewTodoRepoMock() *TodoRepoMock {
 	return new(TodoRepoMock)
+}
+
+func (m *TodoRepoMock) List() ([]entities.Todo, error) {
+	args := m.Called()
+	return args.Get(0).([]entities.Todo), args.Error(1)
 }
 
 func (m *TodoRepoMock) Add(t *entities.Todo) error {

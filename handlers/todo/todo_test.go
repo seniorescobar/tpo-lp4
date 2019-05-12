@@ -33,10 +33,47 @@ func (ts *TodoTestSuite) SetupSuite() {
 	ts.server = httptest.NewServer(r)
 }
 
+func (ts *TodoTestSuite) TestList() {
+	// mock todo repo
+	ts.todoRepoMock.On("List").Return([]entities.Todo{
+		{1, "description 1"},
+		{2, "description 2"},
+	}, nil)
+
+	for _, tc := range []struct {
+		resCode int
+		resBody string
+	}{
+		{http.StatusOK, `[{"id":1,"description":"description 1"},{"id":2,"description":"description 2"}]`},
+	} {
+		req, err := http.NewRequest(http.MethodGet, ts.server.URL+"/todo/", nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		client := &http.Client{}
+		res, err := client.Do(req)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ts.Equal(tc.resCode, res.StatusCode)
+
+		resBody, err := ioutil.ReadAll(res.Body)
+		res.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ts.JSONEq(tc.resBody, string(resBody))
+	}
+
+	ts.todoRepoMock.AssertCalled(ts.T(), "List")
+}
+
 func (ts *TodoTestSuite) TestAdd() {
-	desc1 := "description 1"
 	t1 := &entities.Todo{
-		Description: &desc1,
+		Description: "description 1",
 	}
 
 	// mock todo repo

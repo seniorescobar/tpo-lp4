@@ -25,6 +25,22 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 	r.HandleFunc("/todo/", h.del).Methods(http.MethodDelete)
 }
 
+func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
+	list, err := h.todoService.List()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	e := json.NewEncoder(w)
+	if err := e.Encode(list); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 	t := new(entities.Todo)
 	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
@@ -39,9 +55,6 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
-
-// TODO
-func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {}
 
 // TODO
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {}
