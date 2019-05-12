@@ -20,10 +20,12 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 		todoService,
 	}
 
-	r.HandleFunc("/todo/", h.list).Methods(http.MethodGet)
-	r.HandleFunc("/todo/", h.add).Methods(http.MethodPost)
-	r.HandleFunc("/todo/{id}", h.edit).Methods(http.MethodPut)
-	r.HandleFunc("/todo/", h.del).Methods(http.MethodDelete)
+	rt := r.PathPrefix("/todo/").Subrouter()
+
+	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
+	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
+	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
+	rt.HandleFunc("/", h.del).Methods(http.MethodDelete)
 }
 
 func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
