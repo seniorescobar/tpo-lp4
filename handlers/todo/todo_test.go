@@ -1,6 +1,7 @@
 package todo
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -151,6 +152,41 @@ func (ts *TodoTestSuite) TestEdit() {
 	}
 
 	ts.todoRepoMock.AssertCalled(ts.T(), "Edit", 1, t1)
+}
+
+func (ts *TodoTestSuite) TestDelete() {
+	// mock todo repo
+	ts.todoRepoMock.On("Delete", 1).Return(nil)
+
+	for _, tc := range []struct {
+		reqId   int
+		resCode int
+	}{
+		{1, http.StatusOK},
+	} {
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/todo/%d", ts.server.URL, tc.reqId), nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		client := &http.Client{}
+		res, err := client.Do(req)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ts.Equal(tc.resCode, res.StatusCode)
+
+		resBody, err := ioutil.ReadAll(res.Body)
+		res.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ts.Empty(resBody)
+	}
+
+	ts.todoRepoMock.AssertCalled(ts.T(), "Delete", 1)
 }
 
 func (ts *TodoTestSuite) TeardownTest() {

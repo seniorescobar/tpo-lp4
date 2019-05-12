@@ -24,3 +24,7 @@ func (s *TodoService) Add(t *entities.Todo) error {
 func (s *TodoService) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {
 	return s.todoRepo.Edit(id, t)
 }
+
+func (s *TodoService) Delete(id int) error {
+	return s.todoRepo.Delete(id)
+}

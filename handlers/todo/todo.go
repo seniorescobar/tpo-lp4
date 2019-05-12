@@ -25,7 +25,7 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
 	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
 	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
-	rt.HandleFunc("/", h.del).Methods(http.MethodDelete)
+	rt.HandleFunc("/{id}", h.del).Methods(http.MethodDelete)
 }
 
 func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
@@ -85,5 +85,17 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// TODO
-func (h *TodoHandler) del(w http.ResponseWriter, req *http.Request) {}
+func (h *TodoHandler) del(w http.ResponseWriter, req *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(req)["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if err := h.todoService.Delete(id); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
