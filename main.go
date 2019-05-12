@@ -5,14 +5,17 @@ import (
 	"log"
 	"net/http"
 
-	"bitbucket.org/aj5110/tpo-lp4/handlers/auth"
+	"bitbucket.org/aj5110/tpo-lp4/handlers/todo"
 	"bitbucket.org/aj5110/tpo-lp4/repositories"
 	"bitbucket.org/aj5110/tpo-lp4/services"
+
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 )
 
 func main() {
 	// db
-	db, err := sql.Open("", "")
+	db, err := sql.Open("postgres", "user=postgres password=docker dbname=postgres sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,17 +26,18 @@ func main() {
 
 	// repositories
 	var (
-		userRepo = repositories.NewUserRepo(db)
+		todoRepo = repositories.NewTodoRepo(db)
 	)
 
 	// services
 	var (
-		authService = services.NewAuthService(userRepo)
+		todoService = services.NewTodoService(todoRepo)
 	)
 
 	// routes
-	auth.SetAuthHandler(http.DefaultServeMux, authService)
+	r := mux.NewRouter()
+	todo.SetTodoHandler(r, todoService)
 
 	// serve
-	http.ListenAndServe(":8080", http.DefaultServeMux)
+	http.ListenAndServe(":8080", r)
 }
