@@ -9,8 +9,9 @@ import (
 )
 
 type ITodoRepo interface {
-	List() ([]entities.Todo, error)
-	Add(t *entities.Todo) error
+	List() ([]entities.TodoWithId, error)
+	Add(*entities.Todo) error
+	Edit(int, *entities.Todo) (*entities.TodoWithId, error)
 }
 
 type TodoRepo struct {
@@ -21,7 +22,7 @@ func NewTodoRepo(db *sql.DB) *TodoRepo {
 	return &TodoRepo{db}
 }
 
-func (r *TodoRepo) List() ([]entities.Todo, error) {
+func (r *TodoRepo) List() ([]entities.TodoWithId, error) {
 	log.Println("list")
 	return nil, nil
 }
@@ -29,6 +30,11 @@ func (r *TodoRepo) List() ([]entities.Todo, error) {
 func (r *TodoRepo) Add(t *entities.Todo) error {
 	log.Println("add", *t)
 	return nil
+}
+
+func (r *TodoRepo) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {
+	log.Println("edit", id, *t)
+	return nil, nil
 }
 
 // MOCK
@@ -41,12 +47,17 @@ func NewTodoRepoMock() *TodoRepoMock {
 	return new(TodoRepoMock)
 }
 
-func (m *TodoRepoMock) List() ([]entities.Todo, error) {
+func (m *TodoRepoMock) List() ([]entities.TodoWithId, error) {
 	args := m.Called()
-	return args.Get(0).([]entities.Todo), args.Error(1)
+	return args.Get(0).([]entities.TodoWithId), args.Error(1)
 }
 
 func (m *TodoRepoMock) Add(t *entities.Todo) error {
 	args := m.Called(t)
 	return args.Error(0)
+}
+
+func (m *TodoRepoMock) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {
+	args := m.Called(id, t)
+	return args.Get(0).(*entities.TodoWithId), args.Error(1)
 }

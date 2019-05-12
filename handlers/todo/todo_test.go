@@ -35,9 +35,9 @@ func (ts *TodoTestSuite) SetupSuite() {
 
 func (ts *TodoTestSuite) TestList() {
 	// mock todo repo
-	ts.todoRepoMock.On("List").Return([]entities.Todo{
-		{1, "description 1"},
-		{2, "description 2"},
+	ts.todoRepoMock.On("List").Return([]entities.TodoWithId{
+		{1, entities.Todo{Description: "description 1"}},
+		{2, entities.Todo{Description: "description 2"}},
 	}, nil)
 
 	for _, tc := range []struct {
@@ -109,6 +109,48 @@ func (ts *TodoTestSuite) TestAdd() {
 	}
 
 	ts.todoRepoMock.AssertCalled(ts.T(), "Add", t1)
+}
+
+func (ts *TodoTestSuite) TestEdit() {
+	var (
+		t1 = &entities.Todo{
+			Description: "description 1",
+		}
+	)
+
+	// mock todo repo
+	ts.todoRepoMock.On("Edit", 1, t1).Return(&entities.TodoWithId{1, entities.Todo{Description: t1.Description}}, nil)
+
+	for _, tc := range []struct {
+		reqBody io.Reader
+		resCode int
+		resBody string
+	}{
+		{strings.NewReader(`{"description":"description 1"}`), http.StatusOK, `{"id":1,"description":"description 1"}`},
+	} {
+		req, err := http.NewRequest(http.MethodPut, ts.server.URL+"/todo/1", tc.reqBody)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		client := &http.Client{}
+		res, err := client.Do(req)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ts.Equal(tc.resCode, res.StatusCode)
+
+		resBody, err := ioutil.ReadAll(res.Body)
+		res.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ts.JSONEq(tc.resBody, string(resBody))
+	}
+
+	ts.todoRepoMock.AssertCalled(ts.T(), "Edit", 1, t1)
 }
 
 func (ts *TodoTestSuite) TeardownTest() {

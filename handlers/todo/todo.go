@@ -3,6 +3,7 @@ package todo
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 
@@ -21,7 +22,7 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 
 	r.HandleFunc("/todo/", h.list).Methods(http.MethodGet)
 	r.HandleFunc("/todo/", h.add).Methods(http.MethodPost)
-	r.HandleFunc("/todo/", h.edit).Methods(http.MethodPut)
+	r.HandleFunc("/todo/{id}", h.edit).Methods(http.MethodPut)
 	r.HandleFunc("/todo/", h.del).Methods(http.MethodDelete)
 }
 
@@ -32,8 +33,7 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	e := json.NewEncoder(w)
-	if err := e.Encode(list); err != nil {
+	if err := json.NewEncoder(w).Encode(list); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -56,8 +56,32 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// TODO
-func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {}
+func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(req)["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	t := new(entities.Todo)
+	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	newTodo, err := h.todoService.Edit(id, t)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(newTodo); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
 
 // TODO
 func (h *TodoHandler) del(w http.ResponseWriter, req *http.Request) {}
