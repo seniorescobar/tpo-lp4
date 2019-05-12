@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"bitbucket.org/aj5110/tpo-lp4/container"
 	"bitbucket.org/aj5110/tpo-lp4/repositories"
+	"bitbucket.org/aj5110/tpo-lp4/services"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -23,14 +23,12 @@ type AuthTestSuite struct {
 }
 
 func (ts *AuthTestSuite) SetupSuite() {
-	ts.server = httptest.NewServer(http.HandlerFunc(register))
-}
+	mux := http.NewServeMux()
 
-func (ts *AuthTestSuite) SetupTest() {
-	ts.userRepoMock = new(repositories.UserRepoMock)
-	container.GetUserRepo = func() repositories.IUserRepo {
-		return ts.userRepoMock
-	}
+	ts.userRepoMock = repositories.NewUserRepoMock()
+	SetAuthHandler(mux, services.NewAuthService(ts.userRepoMock))
+
+	ts.server = httptest.NewServer(mux)
 }
 
 func (ts *AuthTestSuite) TestRegister() {

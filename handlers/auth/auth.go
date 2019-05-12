@@ -4,14 +4,22 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"bitbucket.org/aj5110/tpo-lp4/container"
+	"bitbucket.org/aj5110/tpo-lp4/services"
 )
 
-func Routes() {
-	http.HandleFunc("/register/", register)
+type AuthHandler struct {
+	authService *services.AuthService
 }
 
-func register(w http.ResponseWriter, req *http.Request) {
+func SetAuthHandler(mux *http.ServeMux, authService *services.AuthService) {
+	ah := AuthHandler{
+		authService,
+	}
+
+	mux.HandleFunc("/register/", ah.register)
+}
+
+func (ah *AuthHandler) register(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -27,7 +35,7 @@ func register(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := container.GetAuthService().RegisterUser(rf.Email, rf.Password); err != nil {
+	if err := ah.authService.RegisterUser(rf.Email, rf.Password); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -1,12 +1,22 @@
 package repositories
 
-import "github.com/stretchr/testify/mock"
+import (
+	"database/sql"
+
+	"github.com/stretchr/testify/mock"
+)
 
 type IUserRepo interface {
 	Register(email, password string) error
 }
 
-type UserRepo struct{}
+type UserRepo struct {
+	db *sql.DB
+}
+
+func NewUserRepo(db *sql.DB) *UserRepo {
+	return &UserRepo{db}
+}
 
 func (r *UserRepo) Register(email, password string) error {
 	// register user
@@ -16,6 +26,10 @@ func (r *UserRepo) Register(email, password string) error {
 
 type UserRepoMock struct {
 	mock.Mock
+}
+
+func NewUserRepoMock() *UserRepoMock {
+	return new(UserRepoMock)
 }
 
 func (m *UserRepoMock) Register(email, password string) error {

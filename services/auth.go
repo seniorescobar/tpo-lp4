@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log"
+
 	"bitbucket.org/aj5110/tpo-lp4/repositories"
 )
 
@@ -13,5 +15,6 @@ func NewAuthService(userRepo repositories.IUserRepo) *AuthService {
 }
 
 func (s *AuthService) RegisterUser(email, password string) error {
+	log.Printf("%T\n", s.userRepo)
 	return s.userRepo.Register(email, password)
 }
