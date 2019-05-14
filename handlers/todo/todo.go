@@ -2,6 +2,7 @@ package todo
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -46,11 +47,20 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 	t := new(entities.Todo)
 	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tNew, err := h.todoService.Add(req.Context(), t)
+	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if err := h.todoService.Add(t); err != nil {
+	if err := json.NewEncoder(w).Encode(tNew); err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

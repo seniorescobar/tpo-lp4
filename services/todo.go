@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+
 	"bitbucket.org/aj5110/tpo-lp4/entities"
 	"bitbucket.org/aj5110/tpo-lp4/repositories"
 )
@@ -17,8 +19,8 @@ func (s *TodoService) List() ([]entities.TodoWithId, error) {
 	return s.todoRepo.List()
 }
 
-func (s *TodoService) Add(t *entities.Todo) error {
-	return s.todoRepo.Add(t)
+func (s *TodoService) Add(ctx context.Context, t *entities.Todo) (*entities.TodoWithId, error) {
+	return s.todoRepo.Add(ctx, t)
 }
 
 func (s *TodoService) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {

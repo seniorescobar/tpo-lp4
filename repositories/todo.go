@@ -1,25 +1,26 @@
 package repositories
 
 import (
-	"database/sql"
+	"context"
 	"log"
 
 	"bitbucket.org/aj5110/tpo-lp4/entities"
 	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ITodoRepo interface {
 	List() ([]entities.TodoWithId, error)
-	Add(*entities.Todo) error
+	Add(context.Context, *entities.Todo) (*entities.TodoWithId, error)
 	Edit(int, *entities.Todo) (*entities.TodoWithId, error)
 	Delete(int) error
 }
 
 type TodoRepo struct {
-	db *sql.DB
+	db *mongo.Database
 }
 
-func NewTodoRepo(db *sql.DB) *TodoRepo {
+func NewTodoRepo(db *mongo.Database) *TodoRepo {
 	return &TodoRepo{db}
 }
 
@@ -28,9 +29,20 @@ func (r *TodoRepo) List() ([]entities.TodoWithId, error) {
 	return nil, nil
 }
 
-func (r *TodoRepo) Add(t *entities.Todo) error {
-	log.Println("add", *t)
-	return nil
+func (r *TodoRepo) Add(ctx context.Context, t *entities.Todo) (*entities.TodoWithId, error) {
+	res, err := r.db.Collection("todo").InsertOne(ctx, t)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("res", res)
+
+	tNew := entities.TodoWithId{1, entities.Todo{"abc"}}
+	// if err := r.db.Collection("todo").FindOne(ctx, entities.TodoWithId{Id: res.ID}); err != nil {
+	// 	return nil, err
+	// }
+
+	return &tNew, nil
 }
 
 func (r *TodoRepo) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {
@@ -58,9 +70,9 @@ func (m *TodoRepoMock) List() ([]entities.TodoWithId, error) {
 	return args.Get(0).([]entities.TodoWithId), args.Error(1)
 }
 
-func (m *TodoRepoMock) Add(t *entities.Todo) error {
-	args := m.Called(t)
-	return args.Error(0)
+func (m *TodoRepoMock) Add(ctx context.Context, t *entities.Todo) (*entities.TodoWithId, error) {
+	args := m.Called(ctx, t)
+	return args.Get(0).(*entities.TodoWithId), args.Error(1)
 }
 
 func (m *TodoRepoMock) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {

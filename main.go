@@ -1,28 +1,38 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"bitbucket.org/aj5110/tpo-lp4/handlers/todo"
 	"bitbucket.org/aj5110/tpo-lp4/repositories"
 	"bitbucket.org/aj5110/tpo-lp4/services"
-
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
 	// db
-	db, err := sql.Open("postgres", "user=postgres password=docker dbname=postgres sslmode=disable")
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := db.Ping(); err != nil {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	if err := client.Connect(ctx); err != nil {
 		log.Fatal(err)
 	}
+
+	if err := client.Ping(context.Background(), nil); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Fatal()
+
+	db := client.Database("tpo")
 
 	// repositories
 	var (
@@ -36,8 +46,12 @@ func main() {
 
 	// routes
 	r := mux.NewRouter()
-	todo.SetTodoHandler(r, todoService)
+
+	// api router
+	apiRouter := r.PathPrefix("/api/").Subrouter()
+	todo.SetTodoHandler(apiRouter, todoService)
 
 	// serve
+	log.Println("listening  on port 8080")
 	http.ListenAndServe(":8080", r)
 }
