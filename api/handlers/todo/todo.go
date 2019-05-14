@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"bitbucket.org/aj5110/tpo-lp4/entities"
-	"bitbucket.org/aj5110/tpo-lp4/services"
+	"bitbucket.org/aj5110/tpo-lp4/api/entities"
+	"bitbucket.org/aj5110/tpo-lp4/api/services"
 )
 
 type TodoHandler struct {

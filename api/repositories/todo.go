@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"bitbucket.org/aj5110/tpo-lp4/entities"
+	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -30,19 +30,8 @@ func (r *TodoRepo) List() ([]entities.TodoWithId, error) {
 }
 
 func (r *TodoRepo) Add(ctx context.Context, t *entities.Todo) (*entities.TodoWithId, error) {
-	res, err := r.db.Collection("todo").InsertOne(ctx, t)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println("res", res)
-
-	tNew := entities.TodoWithId{1, entities.Todo{"abc"}}
-	// if err := r.db.Collection("todo").FindOne(ctx, entities.TodoWithId{Id: res.ID}); err != nil {
-	// 	return nil, err
-	// }
-
-	return &tNew, nil
+	log.Println("add", t)
+	return &entities.TodoWithId{}, nil
 }
 
 func (r *TodoRepo) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {

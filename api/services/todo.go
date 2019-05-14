@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 
-	"bitbucket.org/aj5110/tpo-lp4/entities"
-	"bitbucket.org/aj5110/tpo-lp4/repositories"
+	"bitbucket.org/aj5110/tpo-lp4/api/entities"
+	"bitbucket.org/aj5110/tpo-lp4/api/repositories"
 )
 
 type TodoService struct {

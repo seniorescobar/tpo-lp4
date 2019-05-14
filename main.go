@@ -1,38 +1,35 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"time"
 
-	"bitbucket.org/aj5110/tpo-lp4/handlers/todo"
-	"bitbucket.org/aj5110/tpo-lp4/repositories"
-	"bitbucket.org/aj5110/tpo-lp4/services"
+	"bitbucket.org/aj5110/tpo-lp4/api/handlers/todo"
+	"bitbucket.org/aj5110/tpo-lp4/api/repositories"
+	"bitbucket.org/aj5110/tpo-lp4/api/services"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
 	// db
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatal(err)
-	}
+	// client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	if err := client.Connect(ctx); err != nil {
-		log.Fatal(err)
-	}
+	// ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	// if err := client.Connect(ctx); err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	if err := client.Ping(context.Background(), nil); err != nil {
-		log.Fatal(err)
-	}
+	// if err := client.Ping(context.Background(), nil); err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	log.Fatal()
+	// db := client.Database("tpo")
 
-	db := client.Database("tpo")
+	var db *mongo.Database
 
 	// repositories
 	var (
@@ -46,6 +43,10 @@ func main() {
 
 	// routes
 	r := mux.NewRouter()
+
+	// client static files
+	r.Handle("/", http.FileServer(http.Dir("./client/dist/"))).Methods(http.MethodGet)
+	r.PathPrefix("/static/js").Handler(http.StripPrefix("/static/js/", http.FileServer(http.Dir("./client/dist/static/js/"))))
 
 	// api router
 	apiRouter := r.PathPrefix("/api/").Subrouter()
