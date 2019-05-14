@@ -46,7 +46,8 @@ func main() {
 
 	// client static files
 	r.Handle("/", http.FileServer(http.Dir("./client/dist/"))).Methods(http.MethodGet)
-	r.PathPrefix("/static/js").Handler(http.StripPrefix("/static/js/", http.FileServer(http.Dir("./client/dist/static/js/"))))
+	r.PathPrefix("/js").Handler(http.StripPrefix("/js/", http.FileServer(http.Dir("./client/dist/js/"))))
+	r.PathPrefix("/css").Handler(http.StripPrefix("/css/", http.FileServer(http.Dir("./client/dist/css/"))))
 
 	// api router
 	apiRouter := r.PathPrefix("/api/").Subrouter()
@@ -54,5 +55,5 @@ func main() {
 
 	// serve
 	log.Println("listening  on port 8080")
-	http.ListenAndServe(":8080", r)
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
