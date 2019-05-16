@@ -23,8 +23,8 @@ func (s *TodoService) Add(ctx context.Context, t *entities.Todo) (*entities.Todo
 	return s.todoRepo.Add(ctx, t)
 }
 
-func (s *TodoService) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {
-	return s.todoRepo.Edit(id, t)
+func (s *TodoService) Edit(ctx context.Context, t *entities.Todo) (*entities.Todo, error) {
+	return s.todoRepo.Edit(ctx, t)
 }
 
 func (s *TodoService) Delete(id int) error {

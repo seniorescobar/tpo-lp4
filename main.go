@@ -1,33 +1,29 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"time"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/todo"
 	"bitbucket.org/aj5110/tpo-lp4/api/repositories"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	mgo "gopkg.in/mgo.v2"
 )
 
 func main() {
-	// db
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+	session, err := mgo.Dial("localhost")
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer session.Close()
 
-	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
-	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+	if err := session.Ping(); err != nil {
 		log.Fatal(err)
 	}
 
-	db := client.Database("tpo")
+	// db
+	db := session.DB("tpo")
 
 	// repositories
 	var (

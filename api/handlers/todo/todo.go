@@ -25,7 +25,7 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 
 	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
 	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
-	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
+	rt.HandleFunc("/", h.edit).Methods(http.MethodPut)
 	rt.HandleFunc("/{id}", h.del).Methods(http.MethodDelete)
 }
 
@@ -67,20 +67,15 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(req)["id"])
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	t := new(entities.Todo)
 	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	newTodo, err := h.todoService.Edit(id, t)
+	newTodo, err := h.todoService.Edit(req.Context(), t)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -89,8 +84,6 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (h *TodoHandler) del(w http.ResponseWriter, req *http.Request) {
