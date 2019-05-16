@@ -41,8 +41,6 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {

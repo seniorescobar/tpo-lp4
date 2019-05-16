@@ -10,7 +10,7 @@ import (
 )
 
 type ITodoRepo interface {
-	List() ([]entities.TodoWithId, error)
+	List() ([]entities.Todo, error)
 	Add(*entities.Todo) (*entities.Todo, error)
 	Edit(bson.ObjectId, *entities.Todo) (*entities.Todo, error)
 	Delete(int) error
@@ -24,9 +24,13 @@ func NewTodoRepo(db *mgo.Database) *TodoRepo {
 	return &TodoRepo{db}
 }
 
-func (r *TodoRepo) List() ([]entities.TodoWithId, error) {
-	log.Println("list")
-	return nil, nil
+func (r *TodoRepo) List() ([]entities.Todo, error) {
+	var todos []entities.Todo
+	if err := r.db.C("todo").Find(nil).All(&todos); err != nil {
+		return nil, err
+	}
+
+	return todos, nil
 }
 
 func (r *TodoRepo) Add(t *entities.Todo) (*entities.Todo, error) {
@@ -70,9 +74,9 @@ func NewTodoRepoMock() *TodoRepoMock {
 	return new(TodoRepoMock)
 }
 
-func (m *TodoRepoMock) List() ([]entities.TodoWithId, error) {
+func (m *TodoRepoMock) List() ([]entities.Todo, error) {
 	args := m.Called()
-	return args.Get(0).([]entities.TodoWithId), args.Error(1)
+	return args.Get(0).([]entities.Todo), args.Error(1)
 }
 
 func (m *TodoRepoMock) Add(t *entities.Todo) (*entities.Todo, error) {

@@ -14,7 +14,7 @@ func NewTodoService(todoRepo repositories.ITodoRepo) *TodoService {
 	return &TodoService{todoRepo}
 }
 
-func (s *TodoService) List() ([]entities.TodoWithId, error) {
+func (s *TodoService) List() ([]entities.Todo, error) {
 	return s.todoRepo.List()
 }
 
