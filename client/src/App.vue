@@ -9,25 +9,6 @@ import { mapActions } from 'vuex'
 
 export default {
     name: 'App',
-    computed: {
-        activeTab () {
-            return {
-                template: 'My Templates',
-                campaign: 'My Campaigns'
-            }[this.$route.name]
-        }
-    },
-    methods: {
-        ...mapActions('massProduction', ['initialize']),
-        getClass (tab) {
-            return {
-                active: tab === this.$route.name
-            }
-        }
-    },
-    created () {
-        this.initialize()
-    }
 }
 </script>
 

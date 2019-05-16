@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import mockData from './constants/mockData'
 // import api from 'client-api'
 
 Vue.use(Vuex)
@@ -15,6 +16,7 @@ export default new Vuex.Store({
     state: getState(),
     getters: {
         constants: () => ({}),
+        mockData: () => mockData,
     },
     actions: {},
     mutations: {},
