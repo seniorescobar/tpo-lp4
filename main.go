@@ -8,28 +8,22 @@ import (
 	"bitbucket.org/aj5110/tpo-lp4/api/repositories"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/mongo"
+	mgo "gopkg.in/mgo.v2"
 )
 
 func main() {
+	session, err := mgo.Dial("localhost")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+
+	if err := session.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
 	// db
-	// client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	// if err := client.Connect(ctx); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// if err := client.Ping(context.Background(), nil); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// db := client.Database("tpo")
-
-	var db *mongo.Database
+	db := session.DB("tpo")
 
 	// repositories
 	var (

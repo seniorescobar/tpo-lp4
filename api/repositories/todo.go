@@ -1,46 +1,70 @@
 package repositories
 
 import (
-	"context"
 	"log"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"github.com/stretchr/testify/mock"
-	"go.mongodb.org/mongo-driver/mongo"
+	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type ITodoRepo interface {
-	List() ([]entities.TodoWithId, error)
-	Add(context.Context, *entities.Todo) (*entities.TodoWithId, error)
-	Edit(int, *entities.Todo) (*entities.TodoWithId, error)
-	Delete(int) error
+	List() ([]entities.Todo, error)
+	Add(*entities.Todo) (*entities.Todo, error)
+	Edit(bson.ObjectId, *entities.Todo) (*entities.Todo, error)
+	Remove(bson.ObjectId) error
 }
 
 type TodoRepo struct {
-	db *mongo.Database
+	db *mgo.Database
 }
 
-func NewTodoRepo(db *mongo.Database) *TodoRepo {
+func NewTodoRepo(db *mgo.Database) *TodoRepo {
 	return &TodoRepo{db}
 }
 
-func (r *TodoRepo) List() ([]entities.TodoWithId, error) {
-	log.Println("list")
-	return nil, nil
+func (r *TodoRepo) List() ([]entities.Todo, error) {
+	var todos []entities.Todo
+	if err := r.db.C("todo").Find(nil).All(&todos); err != nil {
+		return nil, err
+	}
+
+	return todos, nil
 }
 
-func (r *TodoRepo) Add(ctx context.Context, t *entities.Todo) (*entities.TodoWithId, error) {
-	log.Println("add", t)
-	return &entities.TodoWithId{}, nil
+func (r *TodoRepo) Add(t *entities.Todo) (*entities.Todo, error) {
+	tNew := &entities.Todo{
+		Id:          bson.NewObjectId(),
+		Description: t.Description,
+	}
+
+	if err := r.db.C("todo").Insert(tNew); err != nil {
+		return nil, err
+	}
+
+	return tNew, nil
 }
 
-func (r *TodoRepo) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {
-	log.Println("edit", id, *t)
-	return nil, nil
+func (r *TodoRepo) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
+	tNew := &entities.Todo{
+		Id:          id,
+		Description: t.Description,
+	}
+
+	if err := r.db.C("todo").UpdateId(id, tNew); err != nil {
+		return nil, err
+	}
+
+	return tNew, nil
 }
 
-func (r *TodoRepo) Delete(id int) error {
-	log.Println("delete", id)
+func (r *TodoRepo) Remove(id bson.ObjectId) error {
+	if err := r.db.C("todo").RemoveId(id); err != nil {
+		log.Println(err)
+		return err
+	}
+
 	return nil
 }
 
@@ -54,22 +78,22 @@ func NewTodoRepoMock() *TodoRepoMock {
 	return new(TodoRepoMock)
 }
 
-func (m *TodoRepoMock) List() ([]entities.TodoWithId, error) {
+func (m *TodoRepoMock) List() ([]entities.Todo, error) {
 	args := m.Called()
-	return args.Get(0).([]entities.TodoWithId), args.Error(1)
+	return args.Get(0).([]entities.Todo), args.Error(1)
 }
 
-func (m *TodoRepoMock) Add(ctx context.Context, t *entities.Todo) (*entities.TodoWithId, error) {
-	args := m.Called(ctx, t)
-	return args.Get(0).(*entities.TodoWithId), args.Error(1)
+func (m *TodoRepoMock) Add(t *entities.Todo) (*entities.Todo, error) {
+	args := m.Called(t)
+	return args.Get(0).(*entities.Todo), args.Error(1)
 }
 
-func (m *TodoRepoMock) Edit(id int, t *entities.Todo) (*entities.TodoWithId, error) {
+func (m *TodoRepoMock) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
 	args := m.Called(id, t)
-	return args.Get(0).(*entities.TodoWithId), args.Error(1)
+	return args.Get(0).(*entities.Todo), args.Error(1)
 }
 
-func (m *TodoRepoMock) Delete(id int) error {
+func (m *TodoRepoMock) Remove(id bson.ObjectId) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
