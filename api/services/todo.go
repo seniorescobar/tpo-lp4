@@ -26,6 +26,6 @@ func (s *TodoService) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, 
 	return s.todoRepo.Edit(id, t)
 }
 
-func (s *TodoService) Delete(id int) error {
-	return s.todoRepo.Delete(id)
+func (s *TodoService) Remove(id bson.ObjectId) error {
+	return s.todoRepo.Remove(id)
 }

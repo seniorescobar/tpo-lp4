@@ -13,7 +13,7 @@ type ITodoRepo interface {
 	List() ([]entities.Todo, error)
 	Add(*entities.Todo) (*entities.Todo, error)
 	Edit(bson.ObjectId, *entities.Todo) (*entities.Todo, error)
-	Delete(int) error
+	Remove(bson.ObjectId) error
 }
 
 type TodoRepo struct {
@@ -59,8 +59,12 @@ func (r *TodoRepo) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, err
 	return tNew, nil
 }
 
-func (r *TodoRepo) Delete(id int) error {
-	log.Println("delete", id)
+func (r *TodoRepo) Remove(id bson.ObjectId) error {
+	if err := r.db.C("todo").RemoveId(id); err != nil {
+		log.Println(err)
+		return err
+	}
+
 	return nil
 }
 
@@ -89,7 +93,7 @@ func (m *TodoRepoMock) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo,
 	return args.Get(0).(*entities.Todo), args.Error(1)
 }
 
-func (m *TodoRepoMock) Delete(id int) error {
+func (m *TodoRepoMock) Remove(id bson.ObjectId) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
