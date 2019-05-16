@@ -1,0 +1,15 @@
+@import (reference) '~design-system/less/transitions';
+
+.font-smooth {
+    -webkit-font-smoothing  : antialiased;
+    -moz-osx-font-smoothing : grayscale;
+}
+
+.default-button-opacity {
+    transition: opacity @default-transition-time;
+    opacity: .8;
+    
+    &:hover {
+        opacity: 1;
+    }
+}

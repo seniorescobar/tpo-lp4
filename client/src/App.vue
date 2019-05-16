@@ -1,29 +1,102 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div id="app">
+        <!-- <router-view></router-view> -->
     </div>
-    <router-view/>
-  </div>
 </template>
 
-<style lang="less">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
+<script>
+import { mapActions } from 'vuex'
+
+export default {
+    name: 'App',
+    computed: {
+        activeTab () {
+            return {
+                template: 'My Templates',
+                campaign: 'My Campaigns'
+            }[this.$route.name]
+        }
+    },
+    methods: {
+        ...mapActions('massProduction', ['initialize']),
+        getClass (tab) {
+            return {
+                active: tab === this.$route.name
+            }
+        }
+    },
+    created () {
+        this.initialize()
     }
-  }
+}
+</script>
+
+<style lang="less" scoped>
+@import 'less/variables';
+@import 'less/common';
+
+#app {
+    font-family: @regular-font;
+}
+
+.header {
+    height: 50px;
+    background-color: @extremely-dark-gray;
+    padding: 0 105px;
+
+    &__info {
+        display: flex;
+        line-height: 50px;
+    }
+
+    &__title {
+        color: white;
+        font-size: 18px;
+    }
+
+    &__flexible { flex: 1 1 0; }
+
+    &__settings {
+        color: @bluish-gray;
+        min-width: 50px;
+        display: flex;
+        padding: 0 15px;
+
+        svg { margin: auto; }
+    }
+
+    &__navigation {
+        border-top: 2px solid @bg;
+        display: flex;
+    }
+
+    &__tabs {
+        display: flex;
+        height: 100%;
+    }
+
+    &__tab {
+        display: flex;
+        height: 100%;
+        margin-right: 15px;
+        box-sizing: border-box;
+        cursor: pointer;
+
+        svg { margin: auto; }
+
+        &--active {
+            border-bottom: 3px solid white;
+
+            svg path { fill: white; }
+        }
+    }
+
+    &__active-tab {
+        border-left: 2px solid @bg;
+        margin-left: 7px;
+        padding-left: 20px;
+        line-height: 50px;
+        color: white;
+    }
 }
 </style>
