@@ -3,6 +3,7 @@ package services
 import (
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/repositories"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type TodoService struct {
@@ -21,7 +22,7 @@ func (s *TodoService) Add(t *entities.Todo) (*entities.Todo, error) {
 	return s.todoRepo.Add(t)
 }
 
-func (s *TodoService) Edit(id string, t *entities.Todo) (*entities.Todo, error) {
+func (s *TodoService) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
 	return s.todoRepo.Edit(id, t)
 }
 

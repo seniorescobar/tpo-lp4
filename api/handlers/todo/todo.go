@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
@@ -67,7 +68,7 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
-	id := mux.Vars(req)["id"]
+	id := bson.ObjectIdHex(mux.Vars(req)["id"])
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return

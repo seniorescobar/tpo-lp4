@@ -4,15 +4,15 @@ import (
 	"log"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type ITodoRepo interface {
 	List() ([]entities.TodoWithId, error)
 	Add(*entities.Todo) (*entities.Todo, error)
-	Edit(string, *entities.Todo) (*entities.Todo, error)
+	Edit(bson.ObjectId, *entities.Todo) (*entities.Todo, error)
 	Delete(int) error
 }
 
@@ -30,13 +30,8 @@ func (r *TodoRepo) List() ([]entities.TodoWithId, error) {
 }
 
 func (r *TodoRepo) Add(t *entities.Todo) (*entities.Todo, error) {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		return nil, err
-	}
-
 	tNew := &entities.Todo{
-		Id:          id.String(),
+		Id:          bson.NewObjectId(),
 		Description: t.Description,
 	}
 
@@ -47,7 +42,7 @@ func (r *TodoRepo) Add(t *entities.Todo) (*entities.Todo, error) {
 	return tNew, nil
 }
 
-func (r *TodoRepo) Edit(id string, t *entities.Todo) (*entities.Todo, error) {
+func (r *TodoRepo) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
 	tNew := &entities.Todo{
 		Id:          id,
 		Description: t.Description,
@@ -85,7 +80,7 @@ func (m *TodoRepoMock) Add(t *entities.Todo) (*entities.Todo, error) {
 	return args.Get(0).(*entities.Todo), args.Error(1)
 }
 
-func (m *TodoRepoMock) Edit(id string, t *entities.Todo) (*entities.Todo, error) {
+func (m *TodoRepoMock) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
 	args := m.Called(id, t)
 	return args.Get(0).(*entities.Todo), args.Error(1)
 }
