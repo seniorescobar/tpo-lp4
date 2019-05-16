@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"context"
 	"log"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
@@ -12,8 +11,8 @@ import (
 
 type ITodoRepo interface {
 	List() ([]entities.TodoWithId, error)
-	Add(context.Context, *entities.Todo) (*entities.Todo, error)
-	Edit(context.Context, *entities.Todo) (*entities.Todo, error)
+	Add(*entities.Todo) (*entities.Todo, error)
+	Edit(string, *entities.Todo) (*entities.Todo, error)
 	Delete(int) error
 }
 
@@ -30,7 +29,7 @@ func (r *TodoRepo) List() ([]entities.TodoWithId, error) {
 	return nil, nil
 }
 
-func (r *TodoRepo) Add(ctx context.Context, t *entities.Todo) (*entities.Todo, error) {
+func (r *TodoRepo) Add(t *entities.Todo) (*entities.Todo, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err
@@ -48,15 +47,17 @@ func (r *TodoRepo) Add(ctx context.Context, t *entities.Todo) (*entities.Todo, e
 	return tNew, nil
 }
 
-func (r *TodoRepo) Edit(ctx context.Context, t *entities.Todo) (*entities.Todo, error) {
-	// res, err := r.db.Collection("todo").ReplaceOne(ctx, bson.M{"_id": t.Id}, t)
-	// if err != nil {
-	// 	return nil, err
-	// }
+func (r *TodoRepo) Edit(id string, t *entities.Todo) (*entities.Todo, error) {
+	tNew := &entities.Todo{
+		Id:          id,
+		Description: t.Description,
+	}
 
-	// log.Println(res)
+	if err := r.db.C("todo").UpdateId(id, tNew); err != nil {
+		return nil, err
+	}
 
-	return t, nil
+	return tNew, nil
 }
 
 func (r *TodoRepo) Delete(id int) error {
@@ -79,13 +80,13 @@ func (m *TodoRepoMock) List() ([]entities.TodoWithId, error) {
 	return args.Get(0).([]entities.TodoWithId), args.Error(1)
 }
 
-func (m *TodoRepoMock) Add(ctx context.Context, t *entities.Todo) (*entities.Todo, error) {
-	args := m.Called(ctx, t)
+func (m *TodoRepoMock) Add(t *entities.Todo) (*entities.Todo, error) {
+	args := m.Called(t)
 	return args.Get(0).(*entities.Todo), args.Error(1)
 }
 
-func (m *TodoRepoMock) Edit(ctx context.Context, t *entities.Todo) (*entities.Todo, error) {
-	args := m.Called(ctx, t)
+func (m *TodoRepoMock) Edit(id string, t *entities.Todo) (*entities.Todo, error) {
+	args := m.Called(id, t)
 	return args.Get(0).(*entities.Todo), args.Error(1)
 }
 

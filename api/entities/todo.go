@@ -6,6 +6,6 @@ type TodoWithId struct {
 }
 
 type Todo struct {
-	Id          string `json:"_id"`
+	Id          string `bson:"_id" json:"_id""`
 	Description string `json:"description"`
 }
