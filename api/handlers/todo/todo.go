@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
@@ -26,7 +26,7 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
 	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
 	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
-	rt.HandleFunc("/{id}", h.del).Methods(http.MethodDelete)
+	rt.HandleFunc("/{id}", h.remove).Methods(http.MethodDelete)
 }
 
 func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
@@ -40,8 +40,6 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
@@ -52,7 +50,7 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tNew, err := h.todoService.Add(req.Context(), t)
+	tNew, err := h.todoService.Add(t)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -64,13 +62,11 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(req)["id"])
-	if err != nil {
+	id := bson.ObjectIdHex(mux.Vars(req)["id"])
+	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -83,6 +79,7 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 
 	newTodo, err := h.todoService.Edit(id, t)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -91,18 +88,11 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
-func (h *TodoHandler) del(w http.ResponseWriter, req *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(req)["id"])
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if err := h.todoService.Delete(id); err != nil {
+func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
+	id := bson.ObjectIdHex(mux.Vars(req)["id"])
+	if err := h.todoService.Remove(id); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
