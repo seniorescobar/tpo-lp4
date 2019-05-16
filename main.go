@@ -1,35 +1,33 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/todo"
 	"bitbucket.org/aj5110/tpo-lp4/api/repositories"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 func main() {
 	// db
-	// client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	// if err := client.Connect(ctx); err != nil {
-	// 	log.Fatal(err)
-	// }
+	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+		log.Fatal(err)
+	}
 
-	// if err := client.Ping(context.Background(), nil); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// db := client.Database("tpo")
-
-	var db *mongo.Database
+	db := client.Database("tpo")
 
 	// repositories
 	var (

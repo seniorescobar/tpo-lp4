@@ -19,7 +19,7 @@ func (s *TodoService) List() ([]entities.TodoWithId, error) {
 	return s.todoRepo.List()
 }
 
-func (s *TodoService) Add(ctx context.Context, t *entities.Todo) (*entities.TodoWithId, error) {
+func (s *TodoService) Add(ctx context.Context, t *entities.Todo) (*entities.Todo, error) {
 	return s.todoRepo.Add(ctx, t)
 }
 
