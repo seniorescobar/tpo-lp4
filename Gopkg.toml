@@ -1,0 +1,11 @@
+[[constraint]]
+  branch = "master"
+  name = "github.com/gorilla/mux"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/stretchr/testify"
+
+[[constraint]]
+  branch = "v2"
+  name = "gopkg.in/mgo.v2"
