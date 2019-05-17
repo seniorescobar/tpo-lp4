@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"gopkg.in/mgo.v2/bson"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
+	"bitbucket.org/aj5110/tpo-lp4/api/helpers"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
 )
 
@@ -65,8 +65,8 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
-	id := bson.ObjectIdHex(mux.Vars(req)["id"])
-	if id == "" {
+	id, err := helpers.ObjectIdHex(mux.Vars(req)["id"])
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -91,7 +91,12 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
-	id := bson.ObjectIdHex(mux.Vars(req)["id"])
+	id, err := helpers.ObjectIdHex(mux.Vars(req)["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	if err := h.todoService.Remove(id); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
