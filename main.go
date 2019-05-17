@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/calendar"
+	"bitbucket.org/aj5110/tpo-lp4/api/handlers/timetable"
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/todo"
 	"bitbucket.org/aj5110/tpo-lp4/api/repositories"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
@@ -29,14 +30,16 @@ func main() {
 
 	// repositories
 	var (
-		todoRepo     = repositories.NewTodoRepo(db)
-		calendarRepo = repositories.NewCalendarRepo(db)
+		todoRepo      = repositories.NewTodoRepo(db)
+		calendarRepo  = repositories.NewCalendarRepo(db)
+		timetableRepo = repositories.NewTimetableRepo(db)
 	)
 
 	// services
 	var (
-		todoService     = services.NewTodoService(todoRepo)
-		calendarService = services.NewCalendarService(calendarRepo)
+		todoService      = services.NewTodoService(todoRepo)
+		calendarService  = services.NewCalendarService(calendarRepo)
+		timetableService = services.NewTimetableService(timetableRepo)
 	)
 
 	// routes
@@ -51,6 +54,7 @@ func main() {
 	apiRouter := r.PathPrefix("/api/").Subrouter()
 	todo.SetTodoHandler(apiRouter, todoService)
 	calendar.SetCalendarHandler(apiRouter, calendarService)
+	timetable.SetTimetableHandler(apiRouter, timetableService)
 
 	// serve
 	log.Println("listening  on port 8080")
