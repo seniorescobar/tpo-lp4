@@ -15,6 +15,7 @@ import (
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type TodoTestSuite struct {
@@ -36,16 +37,16 @@ func (ts *TodoTestSuite) SetupSuite() {
 
 func (ts *TodoTestSuite) TestList() {
 	// mock todo repo
-	ts.todoRepoMock.On("List").Return([]entities.TodoWithId{
-		{1, entities.Todo{Description: "description 1"}},
-		{2, entities.Todo{Description: "description 2"}},
+	ts.todoRepoMock.On("List").Return([]entities.Todo{
+		{Id: bson.ObjectId([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}), Description: "description 1"},
+		{Id: bson.ObjectId([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}), Description: "description 2"},
 	}, nil)
 
 	for _, tc := range []struct {
 		resCode int
 		resBody string
 	}{
-		{http.StatusOK, `[{"id":1,"description":"description 1"},{"id":2,"description":"description 2"}]`},
+		{http.StatusOK, `[{"_id":"000000000000000000000000","description":"description 1"},{"_id":"000000000000000000000001","description":"description 2"}]`},
 	} {
 		req, err := http.NewRequest(http.MethodGet, ts.server.URL+"/todo/", nil)
 		if err != nil {
@@ -78,58 +79,19 @@ func (ts *TodoTestSuite) TestAdd() {
 	}
 
 	// mock todo repo
-	ts.todoRepoMock.On("Add", t1).Return(nil)
-
-	for _, tc := range []struct {
-		reqBody io.Reader
-		resCode int
-		resBody []byte
-	}{
-		{strings.NewReader(`{"description":"description 1"}`), http.StatusOK, []byte("")},
-	} {
-		req, err := http.NewRequest(http.MethodPost, ts.server.URL+"/todo/", tc.reqBody)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		client := &http.Client{}
-		res, err := client.Do(req)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		ts.Equal(tc.resCode, res.StatusCode)
-
-		resBody, err := ioutil.ReadAll(res.Body)
-		res.Body.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		ts.Equal(tc.resBody, resBody)
-	}
-
-	ts.todoRepoMock.AssertCalled(ts.T(), "Add", t1)
-}
-
-func (ts *TodoTestSuite) TestEdit() {
-	var (
-		t1 = &entities.Todo{
-			Description: "description 1",
-		}
-	)
-
-	// mock todo repo
-	ts.todoRepoMock.On("Edit", 1, t1).Return(&entities.TodoWithId{1, entities.Todo{Description: t1.Description}}, nil)
+	ts.todoRepoMock.On("Add", t1).Return(&entities.Todo{
+		Id:          bson.ObjectId([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}),
+		Description: "description 1",
+	}, nil)
 
 	for _, tc := range []struct {
 		reqBody io.Reader
 		resCode int
 		resBody string
 	}{
-		{strings.NewReader(`{"description":"description 1"}`), http.StatusOK, `{"id":1,"description":"description 1"}`},
+		{strings.NewReader(`{"description":"description 1"}`), http.StatusOK, `{"_id":"000000000000000000000001","description":"description 1"}`},
 	} {
-		req, err := http.NewRequest(http.MethodPut, ts.server.URL+"/todo/1", tc.reqBody)
+		req, err := http.NewRequest(http.MethodPost, ts.server.URL+"/todo/", tc.reqBody)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -151,20 +113,67 @@ func (ts *TodoTestSuite) TestEdit() {
 		ts.JSONEq(tc.resBody, string(resBody))
 	}
 
-	ts.todoRepoMock.AssertCalled(ts.T(), "Edit", 1, t1)
+	ts.todoRepoMock.AssertCalled(ts.T(), "Add", t1)
+}
+
+func (ts *TodoTestSuite) TestEdit() {
+	var (
+		oid1 = bson.ObjectId([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1})
+		t1   = &entities.Todo{
+			Description: "description 1",
+		}
+	)
+
+	// mock todo repo
+	ts.todoRepoMock.On("Edit", oid1, t1).Return(&entities.Todo{Id: oid1, Description: t1.Description}, nil)
+
+	for _, tc := range []struct {
+		reqBody io.Reader
+		resCode int
+		resBody string
+	}{
+		{strings.NewReader(`{"description":"description 1"}`), http.StatusOK, `{"_id":"000000000000000000000001","description":"description 1"}`},
+	} {
+		req, err := http.NewRequest(http.MethodPut, ts.server.URL+"/todo/000000000000000000000001", tc.reqBody)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		client := &http.Client{}
+		res, err := client.Do(req)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ts.Equal(tc.resCode, res.StatusCode)
+
+		resBody, err := ioutil.ReadAll(res.Body)
+		res.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ts.JSONEq(tc.resBody, string(resBody))
+	}
+
+	ts.todoRepoMock.AssertCalled(ts.T(), "Edit", oid1, t1)
 }
 
 func (ts *TodoTestSuite) TestDelete() {
+	var (
+		oid1 = bson.ObjectId([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1})
+	)
+
 	// mock todo repo
-	ts.todoRepoMock.On("Delete", 1).Return(nil)
+	ts.todoRepoMock.On("Remove", oid1).Return(nil)
 
 	for _, tc := range []struct {
-		reqId   int
+		reqId   string
 		resCode int
 	}{
-		{1, http.StatusOK},
+		{`000000000000000000000001`, http.StatusOK},
 	} {
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/todo/%d", ts.server.URL, tc.reqId), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/todo/%s", ts.server.URL, tc.reqId), nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -186,7 +195,7 @@ func (ts *TodoTestSuite) TestDelete() {
 		ts.Empty(resBody)
 	}
 
-	ts.todoRepoMock.AssertCalled(ts.T(), "Delete", 1)
+	ts.todoRepoMock.AssertCalled(ts.T(), "Remove", oid1)
 }
 
 func (ts *TodoTestSuite) TeardownTest() {
