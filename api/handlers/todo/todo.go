@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	mgo "gopkg.in/mgo.v2"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/helpers"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type TodoHandler struct {
