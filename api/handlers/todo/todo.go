@@ -38,11 +38,16 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(list); err != nil {
+	listJ, err := json.Marshal(list)
+	if err != nil {
 		log.WithField("err", err).Error("error encoding todos")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(listJ)
 }
 
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
@@ -63,7 +68,8 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(tNew); err != nil {
+	tNewJ, err := json.Marshal(tNew)
+	if err != nil {
 		log.WithFields(log.Fields{
 			"err":      err,
 			"todo new": tNew,
@@ -71,6 +77,10 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(tNewJ)
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
@@ -107,7 +117,9 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(tNew); err != nil {
+	req.Header.Set("Content-Type", "application/json")
+	tNewJ, err := json.Marshal(tNew)
+	if err != nil {
 		log.WithFields(log.Fields{
 			"err":      err,
 			"todo new": tNew,
@@ -115,6 +127,10 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(tNewJ)
 }
 
 func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
