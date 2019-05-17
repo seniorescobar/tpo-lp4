@@ -46,7 +46,7 @@ func (ts *TodoTestSuite) TestList() {
 		resCode int
 		resBody string
 	}{
-		{http.StatusBadRequest, `[{"_id":"000000000000000000000000","description":"description 1"},{"_id":"000000000000000000000001","description":"description 2"}]`},
+		{http.StatusOK, `[{"_id":"000000000000000000000000","description":"description 1"},{"_id":"000000000000000000000001","description":"description 2"}]`},
 	} {
 		req, err := http.NewRequest(http.MethodGet, ts.server.URL+"/todo/", nil)
 		if err != nil {
