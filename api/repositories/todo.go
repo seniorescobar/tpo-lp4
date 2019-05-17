@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"log"
-
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"github.com/stretchr/testify/mock"
 	mgo "gopkg.in/mgo.v2"
@@ -61,7 +59,6 @@ func (r *TodoRepo) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, err
 
 func (r *TodoRepo) Remove(id bson.ObjectId) error {
 	if err := r.db.C("todo").RemoveId(id); err != nil {
-		log.Println(err)
 		return err
 	}
 
