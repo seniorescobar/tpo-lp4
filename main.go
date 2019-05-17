@@ -13,7 +13,8 @@ import (
 )
 
 func main() {
-	session, err := mgo.Dial("mongodb")
+	session, err := mgo.Dial("localhost")
+	// session, err := mgo.Dial("mongodb")
 	if err != nil {
 		log.Fatal(err)
 	}
