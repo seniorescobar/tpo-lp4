@@ -10,8 +10,8 @@ import (
 type ITodoRepo interface {
 	List(email string) ([]entities.Todo, error)
 	Add(email string, t *entities.Todo) (*entities.Todo, error)
-	Edit(bson.ObjectId, *entities.Todo) (*entities.Todo, error)
-	Remove(bson.ObjectId) error
+	Edit(email string, id bson.ObjectId, t *entities.Todo) (*entities.Todo, error)
+	Remove(email string, id bson.ObjectId) error
 }
 
 type TodoRepo struct {
@@ -45,21 +45,21 @@ func (r *TodoRepo) Add(email string, t *entities.Todo) (*entities.Todo, error) {
 	return tNew, nil
 }
 
-func (r *TodoRepo) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
-	tNew := &entities.Todo{
-		Id:          id,
-		Description: t.Description,
-	}
-
-	if err := r.db.C("todo").UpdateId(id, tNew); err != nil {
+func (r *TodoRepo) Edit(email string, id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
+	if err := r.db.C("todo").Update(bson.M{"_id": id, "email": email}, bson.M{"$set": bson.M{"description": t.Description}}); err != nil {
 		return nil, err
 	}
 
-	return tNew, nil
+	var tNew entities.Todo
+	if err := r.db.C("todo").Find(bson.M{"_id": id, "email": email}).One(&tNew); err != nil {
+		return nil, err
+	}
+
+	return &tNew, nil
 }
 
-func (r *TodoRepo) Remove(id bson.ObjectId) error {
-	if err := r.db.C("todo").RemoveId(id); err != nil {
+func (r *TodoRepo) Remove(email string, id bson.ObjectId) error {
+	if err := r.db.C("todo").Remove(bson.M{"_id": id, "email": email}); err != nil {
 		return err
 	}
 

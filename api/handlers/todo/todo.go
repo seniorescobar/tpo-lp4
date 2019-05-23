@@ -91,6 +91,8 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
+	email := req.Context().Value("user").(entities.User).Email
+
 	id := mux.Vars(req)["id"]
 
 	oid, err := helpers.ObjectIdHex(id)
@@ -113,7 +115,7 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tNew, err := h.todoService.Edit(oid, t)
+	tNew, err := h.todoService.Edit(email, oid, t)
 	if err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error editing todo")
 		w.WriteHeader(http.StatusNotFound)
@@ -141,6 +143,8 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
+	email := req.Context().Value("user").(entities.User).Email
+
 	id := mux.Vars(req)["id"]
 
 	oid, err := helpers.ObjectIdHex(id)
@@ -153,7 +157,7 @@ func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := h.todoService.Remove(oid); err == mgo.ErrNotFound {
+	if err := h.todoService.Remove(email, oid); err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error removing todo")
 		w.WriteHeader(http.StatusNotFound)
 		return

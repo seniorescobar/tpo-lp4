@@ -22,10 +22,10 @@ func (s *TodoService) Add(email string, t *entities.Todo) (*entities.Todo, error
 	return s.todoRepo.Add(email, t)
 }
 
-func (s *TodoService) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
-	return s.todoRepo.Edit(id, t)
+func (s *TodoService) Edit(email string, id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
+	return s.todoRepo.Edit(email, id, t)
 }
 
-func (s *TodoService) Remove(id bson.ObjectId) error {
-	return s.todoRepo.Remove(id)
+func (s *TodoService) Remove(email string, id bson.ObjectId) error {
+	return s.todoRepo.Remove(email, id)
 }
