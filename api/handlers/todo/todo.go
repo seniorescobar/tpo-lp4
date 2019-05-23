@@ -10,6 +10,7 @@ import (
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/helpers"
+	"bitbucket.org/aj5110/tpo-lp4/api/middleware"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
 )
 
@@ -24,6 +25,8 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 
 	rt := r.PathPrefix("/todo/").Subrouter()
 
+	rt.Use(middleware.Protect)
+
 	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
 	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
 	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
@@ -31,7 +34,9 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 }
 
 func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
-	list, err := h.todoService.List()
+	email := req.Context().Value("user").(entities.User).Email
+
+	list, err := h.todoService.List(email)
 	if err != nil {
 		log.WithField("err", err).Error("error listing todos")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -51,6 +56,8 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
+	email := req.Context().Value("user").(entities.User).Email
+
 	t := new(entities.Todo)
 	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
 		log.WithField("err", err).Error("error decoding todo to add")
@@ -58,7 +65,7 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tNew, err := h.todoService.Add(t)
+	tNew, err := h.todoService.Add(email, t)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err":  err,

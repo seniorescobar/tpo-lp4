@@ -14,12 +14,12 @@ func NewTodoService(todoRepo repositories.ITodoRepo) *TodoService {
 	return &TodoService{todoRepo}
 }
 
-func (s *TodoService) List() ([]entities.Todo, error) {
-	return s.todoRepo.List()
+func (s *TodoService) List(email string) ([]entities.Todo, error) {
+	return s.todoRepo.List(email)
 }
 
-func (s *TodoService) Add(t *entities.Todo) (*entities.Todo, error) {
-	return s.todoRepo.Add(t)
+func (s *TodoService) Add(email string, t *entities.Todo) (*entities.Todo, error) {
+	return s.todoRepo.Add(email, t)
 }
 
 func (s *TodoService) Edit(id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {

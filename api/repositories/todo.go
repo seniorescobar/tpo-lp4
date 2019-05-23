@@ -8,8 +8,8 @@ import (
 )
 
 type ITodoRepo interface {
-	List() ([]entities.Todo, error)
-	Add(*entities.Todo) (*entities.Todo, error)
+	List(email string) ([]entities.Todo, error)
+	Add(email string, t *entities.Todo) (*entities.Todo, error)
 	Edit(bson.ObjectId, *entities.Todo) (*entities.Todo, error)
 	Remove(bson.ObjectId) error
 }
@@ -22,18 +22,19 @@ func NewTodoRepo(db *mgo.Database) *TodoRepo {
 	return &TodoRepo{db}
 }
 
-func (r *TodoRepo) List() ([]entities.Todo, error) {
+func (r *TodoRepo) List(email string) ([]entities.Todo, error) {
 	var todos []entities.Todo
-	if err := r.db.C("todo").Find(nil).All(&todos); err != nil {
+	if err := r.db.C("todo").Find(bson.M{"email": email}).All(&todos); err != nil {
 		return nil, err
 	}
 
 	return todos, nil
 }
 
-func (r *TodoRepo) Add(t *entities.Todo) (*entities.Todo, error) {
+func (r *TodoRepo) Add(email string, t *entities.Todo) (*entities.Todo, error) {
 	tNew := &entities.Todo{
 		Id:          bson.NewObjectId(),
+		Email:       email,
 		Description: t.Description,
 	}
 
