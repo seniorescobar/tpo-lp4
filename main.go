@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"bitbucket.org/aj5110/tpo-lp4/api/handlers/auth"
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/calendar"
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/timetable"
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/todo"
@@ -33,6 +34,7 @@ func main() {
 		todoRepo      = repositories.NewTodoRepo(db)
 		calendarRepo  = repositories.NewCalendarRepo(db)
 		timetableRepo = repositories.NewTimetableRepo(db)
+		authRepo      = repositories.NewAuthRepo(db)
 	)
 
 	// services
@@ -40,6 +42,7 @@ func main() {
 		todoService      = services.NewTodoService(todoRepo)
 		calendarService  = services.NewCalendarService(calendarRepo)
 		timetableService = services.NewTimetableService(timetableRepo)
+		authService      = services.NewAuthService(authRepo)
 	)
 
 	// routes
@@ -55,6 +58,7 @@ func main() {
 	todo.SetTodoHandler(apiRouter, todoService)
 	calendar.SetCalendarHandler(apiRouter, calendarService)
 	timetable.SetTimetableHandler(apiRouter, timetableService)
+	auth.SetAuthHandler(apiRouter, authService)
 
 	// serve
 	log.Println("listening  on port 8080")
