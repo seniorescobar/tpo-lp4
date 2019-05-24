@@ -27,7 +27,25 @@ func SetAuthHandler(r *mux.Router, authService *services.AuthService) {
 
 	rt := r.PathPrefix("/auth/").Subrouter()
 
+	rt.HandleFunc("/register/", h.register).Methods(http.MethodPost)
 	rt.HandleFunc("/signin/", h.signin).Methods(http.MethodPost)
+}
+
+func (h *AuthHandler) register(w http.ResponseWriter, req *http.Request) {
+	u := new(entities.User)
+	if err := json.NewDecoder(req.Body).Decode(u); err != nil {
+		log.WithField("err", err).Error("error decoding user")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if err := h.authService.Register(u); err != nil {
+		log.WithField("err", err).Error("error registering user")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *AuthHandler) signin(w http.ResponseWriter, req *http.Request) {
@@ -48,7 +66,7 @@ func (h *AuthHandler) signin(w http.ResponseWriter, req *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":    user.Id,
 		"email": user.Email,
-		"exp":   time.Now().Add(time.Hour).Unix(),
+		"exp":   time.Now().Add(24 * time.Hour).Unix(),
 	})
 
 	tokenString, err := token.SignedString(secret)

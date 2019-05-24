@@ -8,7 +8,7 @@ type Auth struct {
 }
 
 type User struct {
-	Id       bson.ObjectId `bson:"_id" json:"_id""`
+	Id       bson.ObjectId `bson:"_id" json:"-"`
 	Email    string        `json:"email"`
-	Password string        `json:"-"`
+	Password string        `json:"password"`
 }
