@@ -34,9 +34,9 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 }
 
 func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
-	email := req.Context().Value("user").(entities.User).Email
+	uid := req.Context().Value("user").(entities.User).Id
 
-	list, err := h.todoService.List(email)
+	list, err := h.todoService.List(uid)
 	if err != nil {
 		log.WithField("err", err).Error("error listing todos")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -56,7 +56,7 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
-	email := req.Context().Value("user").(entities.User).Email
+	uid := req.Context().Value("user").(entities.User).Id
 
 	t := new(entities.Todo)
 	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
@@ -65,7 +65,7 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tNew, err := h.todoService.Add(email, t)
+	tNew, err := h.todoService.Add(uid, t)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err":  err,
@@ -91,7 +91,7 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
-	email := req.Context().Value("user").(entities.User).Email
+	uid := req.Context().Value("user").(entities.User).Id
 
 	id := mux.Vars(req)["id"]
 
@@ -115,7 +115,7 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tNew, err := h.todoService.Edit(email, oid, t)
+	tNew, err := h.todoService.Edit(uid, oid, t)
 	if err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error editing todo")
 		w.WriteHeader(http.StatusNotFound)
@@ -143,7 +143,7 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
-	email := req.Context().Value("user").(entities.User).Email
+	uid := req.Context().Value("user").(entities.User).Id
 
 	id := mux.Vars(req)["id"]
 
@@ -157,7 +157,7 @@ func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := h.todoService.Remove(email, oid); err == mgo.ErrNotFound {
+	if err := h.todoService.Remove(uid, oid); err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error removing todo")
 		w.WriteHeader(http.StatusNotFound)
 		return
