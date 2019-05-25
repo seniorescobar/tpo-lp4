@@ -13,11 +13,11 @@ type IUserRepo interface {
 }
 
 type UserRepo struct {
-	db *mgo.Database
+	c *mgo.Collection
 }
 
 func NewUserRepo(db *mgo.Database) *UserRepo {
-	return &UserRepo{db}
+	return &UserRepo{db.C("user")}
 }
 
 func (r *UserRepo) Register(u *entities.User) error {
@@ -32,7 +32,7 @@ func (r *UserRepo) Register(u *entities.User) error {
 		Password: string(hashedPassword),
 	}
 
-	if err := r.db.C("user").Insert(uNew); err != nil {
+	if err := r.c.Insert(uNew); err != nil {
 		return err
 	}
 
@@ -41,7 +41,7 @@ func (r *UserRepo) Register(u *entities.User) error {
 
 func (r *UserRepo) Signin(email, password string) (*entities.User, error) {
 	var u entities.User
-	if err := r.db.C("user").Find(bson.M{"email": email}).One(&u); err != nil {
+	if err := r.c.Find(bson.M{"email": email}).One(&u); err != nil {
 		return nil, err
 	}
 

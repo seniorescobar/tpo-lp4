@@ -7,30 +7,22 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"bitbucket.org/aj5110/tpo-lp4/api/container"
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
-	"bitbucket.org/aj5110/tpo-lp4/api/services"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 )
 
 var secret = []byte("secret")
 
-type AuthHandler struct {
-	authService *services.AuthService
-}
-
-func SetAuthHandler(r *mux.Router, authService *services.AuthService) {
-	h := AuthHandler{
-		authService,
-	}
-
+func SetAuthHandler(r *mux.Router) {
 	rt := r.PathPrefix("/auth/").Subrouter()
 
-	rt.HandleFunc("/register/", h.register).Methods(http.MethodPost)
-	rt.HandleFunc("/signin/", h.signin).Methods(http.MethodPost)
+	rt.HandleFunc("/register/", register).Methods(http.MethodPost)
+	rt.HandleFunc("/signin/", signin).Methods(http.MethodPost)
 }
 
-func (h *AuthHandler) register(w http.ResponseWriter, req *http.Request) {
+func register(w http.ResponseWriter, req *http.Request) {
 	u := new(entities.User)
 	if err := json.NewDecoder(req.Body).Decode(u); err != nil {
 		log.WithField("err", err).Error("error decoding user")
@@ -38,7 +30,7 @@ func (h *AuthHandler) register(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := h.authService.Register(u); err != nil {
+	if err := container.AuthService.Register(u); err != nil {
 		log.WithField("err", err).Error("error registering user")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -47,7 +39,7 @@ func (h *AuthHandler) register(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *AuthHandler) signin(w http.ResponseWriter, req *http.Request) {
+func signin(w http.ResponseWriter, req *http.Request) {
 	a := &struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -59,7 +51,7 @@ func (h *AuthHandler) signin(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := h.authService.Signin(a.Email, a.Password)
+	user, err := container.AuthService.Signin(a.Email, a.Password)
 	if err != nil {
 		log.WithField("err", err).Error("error signing in")
 		w.WriteHeader(http.StatusBadRequest)

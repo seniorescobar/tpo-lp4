@@ -8,32 +8,24 @@ import (
 	log "github.com/sirupsen/logrus"
 	mgo "gopkg.in/mgo.v2"
 
+	"bitbucket.org/aj5110/tpo-lp4/api/container"
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/helpers"
 	"bitbucket.org/aj5110/tpo-lp4/api/middleware"
-	"bitbucket.org/aj5110/tpo-lp4/api/services"
 )
 
-type TodoHandler struct {
-	todoService *services.TodoService
-}
-
-func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
-	h := TodoHandler{
-		todoService,
-	}
-
+func SetTodoHandler(r *mux.Router) {
 	rt := r.PathPrefix("/todo/").Subrouter()
 
 	rt.Use(middleware.Protect)
 
-	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
-	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
-	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
-	rt.HandleFunc("/{id}", h.remove).Methods(http.MethodDelete)
+	rt.HandleFunc("/", list).Methods(http.MethodGet)
+	rt.HandleFunc("/", add).Methods(http.MethodPost)
+	rt.HandleFunc("/{id}", edit).Methods(http.MethodPut)
+	rt.HandleFunc("/{id}", remove).Methods(http.MethodDelete)
 }
 
-func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
+func list(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -41,7 +33,7 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	list, err := h.todoService.List(uid)
+	list, err := container.TodoService.List(uid)
 	if err != nil {
 		log.WithField("err", err).Error("error listing todos")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -60,7 +52,7 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 	w.Write(listJ)
 }
 
-func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
+func add(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -75,7 +67,7 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tNew, err := h.todoService.Add(uid, t)
+	tNew, err := container.TodoService.Add(uid, t)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err":  err,
@@ -100,7 +92,7 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 	w.Write(tNewJ)
 }
 
-func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
+func edit(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -130,7 +122,7 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tNew, err := h.todoService.Edit(uid, oid, t)
+	tNew, err := container.TodoService.Edit(uid, oid, t)
 	if err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error editing todo")
 		w.WriteHeader(http.StatusNotFound)
@@ -157,7 +149,7 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 	w.Write(tNewJ)
 }
 
-func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
+func remove(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -177,7 +169,7 @@ func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := h.todoService.Remove(uid, oid); err == mgo.ErrNotFound {
+	if err := container.TodoService.Remove(uid, oid); err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error removing todo")
 		w.WriteHeader(http.StatusNotFound)
 		return

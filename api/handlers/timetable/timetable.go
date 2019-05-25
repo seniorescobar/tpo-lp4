@@ -8,33 +8,25 @@ import (
 	log "github.com/sirupsen/logrus"
 	mgo "gopkg.in/mgo.v2"
 
+	"bitbucket.org/aj5110/tpo-lp4/api/container"
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/helpers"
 	"bitbucket.org/aj5110/tpo-lp4/api/middleware"
-	"bitbucket.org/aj5110/tpo-lp4/api/services"
 )
 
-type TimetableHandler struct {
-	timetableService *services.TimetableService
-}
-
-func SetTimetableHandler(r *mux.Router, timetableService *services.TimetableService) {
-	h := TimetableHandler{
-		timetableService,
-	}
-
+func SetTimetableHandler(r *mux.Router) {
 	rt := r.PathPrefix("/course/").Subrouter()
 
 	rt.Use(middleware.Protect)
 
-	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
-	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
-	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
-	rt.HandleFunc("/{id}", h.remove).Methods(http.MethodDelete)
+	rt.HandleFunc("/", list).Methods(http.MethodGet)
+	rt.HandleFunc("/", add).Methods(http.MethodPost)
+	rt.HandleFunc("/{id}", edit).Methods(http.MethodPut)
+	rt.HandleFunc("/{id}", remove).Methods(http.MethodDelete)
 }
 
-func (h *TimetableHandler) list(w http.ResponseWriter, req *http.Request) {
-	list, err := h.timetableService.List(req.Context())
+func list(w http.ResponseWriter, req *http.Request) {
+	list, err := container.TimetableService.List(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error listing courses")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -53,7 +45,7 @@ func (h *TimetableHandler) list(w http.ResponseWriter, req *http.Request) {
 	w.Write(listJ)
 }
 
-func (h *TimetableHandler) add(w http.ResponseWriter, req *http.Request) {
+func add(w http.ResponseWriter, req *http.Request) {
 	e := new(entities.Course)
 	if err := json.NewDecoder(req.Body).Decode(e); err != nil {
 		log.WithField("err", err).Error("error decoding course to add")
@@ -61,7 +53,7 @@ func (h *TimetableHandler) add(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	eNew, err := h.timetableService.Add(req.Context(), e)
+	eNew, err := container.TimetableService.Add(req.Context(), e)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err":    err,
@@ -86,7 +78,7 @@ func (h *TimetableHandler) add(w http.ResponseWriter, req *http.Request) {
 	w.Write(eNewJ)
 }
 
-func (h *TimetableHandler) edit(w http.ResponseWriter, req *http.Request) {
+func edit(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 
 	oid, err := helpers.ObjectIdHex(id)
@@ -109,7 +101,7 @@ func (h *TimetableHandler) edit(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	eNew, err := h.timetableService.Edit(req.Context(), oid, e)
+	eNew, err := container.TimetableService.Edit(req.Context(), oid, e)
 	if err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error editing course")
 		w.WriteHeader(http.StatusNotFound)
@@ -136,7 +128,7 @@ func (h *TimetableHandler) edit(w http.ResponseWriter, req *http.Request) {
 	w.Write(eNewJ)
 }
 
-func (h *TimetableHandler) remove(w http.ResponseWriter, req *http.Request) {
+func remove(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 
 	oid, err := helpers.ObjectIdHex(id)
@@ -149,7 +141,7 @@ func (h *TimetableHandler) remove(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := h.timetableService.Remove(req.Context(), oid); err == mgo.ErrNotFound {
+	if err := container.TimetableService.Remove(req.Context(), oid); err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error removing course")
 		w.WriteHeader(http.StatusNotFound)
 		return

@@ -17,11 +17,11 @@ type ICourseRepo interface {
 }
 
 type CourseRepo struct {
-	db *mgo.Database
+	c *mgo.Collection
 }
 
 func NewCourseRepo(db *mgo.Database) *CourseRepo {
-	return &CourseRepo{db}
+	return &CourseRepo{db.C("course")}
 }
 
 func (r *CourseRepo) List(ctx context.Context) ([]entities.Course, error) {
@@ -31,7 +31,7 @@ func (r *CourseRepo) List(ctx context.Context) ([]entities.Course, error) {
 	}
 
 	var courses []entities.Course
-	if err := r.db.C("course").Find(bson.M{"user_id": uid}).All(&courses); err != nil {
+	if err := r.c.Find(bson.M{"user_id": uid}).All(&courses); err != nil {
 		return nil, err
 	}
 
@@ -52,7 +52,7 @@ func (r *CourseRepo) Add(ctx context.Context, e *entities.Course) (*entities.Cou
 		Color:    e.Color,
 	}
 
-	if err := r.db.C("course").Insert(cNew); err != nil {
+	if err := r.c.Insert(cNew); err != nil {
 		return nil, err
 	}
 
@@ -71,12 +71,12 @@ func (r *CourseRepo) Edit(ctx context.Context, id bson.ObjectId, c *entities.Cou
 		"color":    c.Color,
 	}
 
-	if err := r.db.C("course").Update(bson.M{"_id": id, "user_id": uid}, bson.M{"$set": mNew}); err != nil {
+	if err := r.c.Update(bson.M{"_id": id, "user_id": uid}, bson.M{"$set": mNew}); err != nil {
 		return nil, err
 	}
 
 	var cNew entities.Course
-	if err := r.db.C("course").Find(bson.M{"_id": id, "user_id": uid}).One(&cNew); err != nil {
+	if err := r.c.Find(bson.M{"_id": id, "user_id": uid}).One(&cNew); err != nil {
 		return nil, err
 	}
 
@@ -89,7 +89,7 @@ func (r *CourseRepo) Remove(ctx context.Context, id bson.ObjectId) error {
 		return err
 	}
 
-	if err := r.db.C("course").Remove(bson.M{"_id": id, "user_id": uid}); err != nil {
+	if err := r.c.Remove(bson.M{"_id": id, "user_id": uid}); err != nil {
 		return err
 	}
 
