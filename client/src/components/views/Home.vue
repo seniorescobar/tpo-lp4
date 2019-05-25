@@ -1,13 +1,12 @@
 <template>
     <div class="column__wrapper">
         <div class="column">
-            
         </div>
 
         <div class="column">
             <div class="todo__wrapper">
                 <div class="todo__actions">
-                    <chip class="todo__action" label="Add"/>
+                    <chip class="todo__action" label="Add" @click="openDialog"/>
                     <chip class="todo__action" label="Remove"/>
                 </div>
                 <div class="todo__container">
@@ -15,27 +14,42 @@
                 </div>
             </div>
         </div>
+
+        <md-dialog :md-active.sync="isDialogShown" class="">
+            test
+        </md-dialog>
     </div>
 </template>
 
 <script>
-import { Chip } from 'design-system'
+import { Chip, Input } from 'design-system'
 import { mapGetters } from 'vuex'
 
 export default {
     components: {
-        Chip
+        Chip,
+        InputElement: Input,
+    },
+    data () {
+        return {
+            isDialogShown: false,
+            calendarData: {},
+        }
     },
     computed: {
         ...mapGetters({
             mockData: 'mockData'
         }),
+    },
+    methods: {
+        openDialog () {
+            this.isDialogShown = true
+        }
     }
 }
 </script>
 
 <style lang="less" scoped>
-@import '../../less/variables';
 @import '../../less/common';
 
 .column {
