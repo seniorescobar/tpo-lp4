@@ -7,10 +7,10 @@ import (
 )
 
 type CalendarService struct {
-	calendarRepo repositories.ICalendarRepo
+	calendarRepo repositories.IEventRepo
 }
 
-func NewCalendarService(calendarRepo repositories.ICalendarRepo) *CalendarService {
+func NewCalendarService(calendarRepo repositories.IEventRepo) *CalendarService {
 	return &CalendarService{calendarRepo}
 }
 
