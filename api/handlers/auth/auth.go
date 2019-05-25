@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -80,6 +79,16 @@ func (h *AuthHandler) signin(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", tokenString))
+	tNew, err := json.Marshal(struct {
+		Token string `json:"token"`
+	}{tokenString})
+
+	if err != nil {
+		log.WithField("err", err).Error("error encoding token")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
+	w.Write(tNew)
 }
