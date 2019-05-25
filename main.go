@@ -10,6 +10,7 @@ import (
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/todo"
 	"bitbucket.org/aj5110/tpo-lp4/api/repositories"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	mgo "gopkg.in/mgo.v2"
 )
@@ -47,6 +48,13 @@ func main() {
 
 	// routes
 	r := mux.NewRouter()
+
+	// temporary workaround
+	r.Use(handlers.CORS(
+		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+		handlers.AllowedMethods([]string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}),
+		handlers.AllowedOrigins([]string{"*"}),
+	))
 
 	// client static files
 	r.Handle("/", http.FileServer(http.Dir("./client/dist/"))).Methods(http.MethodGet)

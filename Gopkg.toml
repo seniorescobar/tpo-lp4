@@ -4,6 +4,10 @@
 
 [[constraint]]
     branch = "master"
+    name = "github.com/gorilla/handlers"
+
+[[constraint]]
+    branch = "master"
     name = "github.com/stretchr/testify"
 
 [[constraint]]
