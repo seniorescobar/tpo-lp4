@@ -49,7 +49,11 @@ func (h *AuthHandler) register(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *AuthHandler) signin(w http.ResponseWriter, req *http.Request) {
-	a := new(entities.Auth)
+	a := &struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}{}
+
 	if err := json.NewDecoder(req.Body).Decode(a); err != nil {
 		log.WithField("err", err).Error("error decoding auth")
 		w.WriteHeader(http.StatusBadRequest)
