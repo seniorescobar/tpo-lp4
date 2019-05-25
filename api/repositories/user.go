@@ -7,20 +7,20 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type IAuthRepo interface {
+type IUserRepo interface {
 	Register(u *entities.User) error
 	Signin(string, string) (*entities.User, error)
 }
 
-type AuthRepo struct {
+type UserRepo struct {
 	db *mgo.Database
 }
 
-func NewAuthRepo(db *mgo.Database) *AuthRepo {
-	return &AuthRepo{db}
+func NewUserRepo(db *mgo.Database) *UserRepo {
+	return &UserRepo{db}
 }
 
-func (r *AuthRepo) Register(u *entities.User) error {
+func (r *UserRepo) Register(u *entities.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 8)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func (r *AuthRepo) Register(u *entities.User) error {
 	return nil
 }
 
-func (r *AuthRepo) Signin(email, password string) (*entities.User, error) {
+func (r *UserRepo) Signin(email, password string) (*entities.User, error) {
 	var u entities.User
 	if err := r.db.C("user").Find(bson.M{"email": email}).One(&u); err != nil {
 		return nil, err

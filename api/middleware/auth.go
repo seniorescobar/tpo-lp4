@@ -66,8 +66,8 @@ func Protect(next http.Handler) http.Handler {
 
 // helpers
 
-func GetUID(req *http.Request) (bson.ObjectId, error) {
-	v := req.Context().Value("user")
+func GetUID(ctx context.Context) (bson.ObjectId, error) {
+	v := ctx.Value("user")
 	u, ok := v.(entities.User)
 	if !ok {
 		return "", errors.New("error asserting ctx user")

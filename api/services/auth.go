@@ -6,10 +6,10 @@ import (
 )
 
 type AuthService struct {
-	authRepo repositories.IAuthRepo
+	authRepo repositories.IUserRepo
 }
 
-func NewAuthService(authRepo repositories.IAuthRepo) *AuthService {
+func NewAuthService(authRepo repositories.IUserRepo) *AuthService {
 	return &AuthService{authRepo}
 }
 

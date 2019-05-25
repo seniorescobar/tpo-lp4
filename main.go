@@ -31,18 +31,18 @@ func main() {
 
 	// repositories
 	var (
-		todoRepo      = repositories.NewTodoRepo(db)
-		calendarRepo  = repositories.NewCalendarRepo(db)
-		timetableRepo = repositories.NewTimetableRepo(db)
-		authRepo      = repositories.NewAuthRepo(db)
+		todoRepo   = repositories.NewTodoRepo(db)
+		eventRepo  = repositories.NewEventRepo(db)
+		courseRepo = repositories.NewCourseRepo(db)
+		userRepo   = repositories.NewUserRepo(db)
 	)
 
 	// services
 	var (
 		todoService      = services.NewTodoService(todoRepo)
-		calendarService  = services.NewCalendarService(calendarRepo)
-		timetableService = services.NewTimetableService(timetableRepo)
-		authService      = services.NewAuthService(authRepo)
+		calendarService  = services.NewCalendarService(eventRepo)
+		timetableService = services.NewTimetableService(courseRepo)
+		authService      = services.NewAuthService(userRepo)
 	)
 
 	// routes

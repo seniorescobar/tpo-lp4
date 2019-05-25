@@ -5,8 +5,9 @@ import (
 )
 
 type Course struct {
-	Id       bson.ObjectId `bson:"_id" json:"_id""`
-	Name     string        `json:"name"`
-	Duration int           `json:"duration"`
-	Color    string        `json:"color"`
+	Id       bson.ObjectId `bson:"_id" json:"_id"`
+	UserId   bson.ObjectId `bson:"user_id" json:"-"`
+	Name     string        `bson:"name" json:"name"`
+	Duration int           `bson:"duration" json:"duration"`
+	Color    string        `bson:"color" json:"color"`
 }

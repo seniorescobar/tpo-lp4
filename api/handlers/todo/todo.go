@@ -34,7 +34,7 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 }
 
 func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req)
+	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -61,7 +61,7 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req)
+	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -101,7 +101,7 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req)
+	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -158,7 +158,7 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req)
+	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)

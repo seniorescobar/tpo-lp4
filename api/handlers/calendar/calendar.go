@@ -34,7 +34,7 @@ func SetCalendarHandler(r *mux.Router, calendarService *services.CalendarService
 }
 
 func (h *CalendarHandler) list(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req)
+	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -61,7 +61,7 @@ func (h *CalendarHandler) list(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *CalendarHandler) add(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req)
+	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -101,7 +101,7 @@ func (h *CalendarHandler) add(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *CalendarHandler) edit(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req)
+	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -158,7 +158,7 @@ func (h *CalendarHandler) edit(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *CalendarHandler) remove(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req)
+	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)

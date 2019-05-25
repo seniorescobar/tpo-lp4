@@ -10,6 +10,7 @@ import (
 
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/helpers"
+	"bitbucket.org/aj5110/tpo-lp4/api/middleware"
 	"bitbucket.org/aj5110/tpo-lp4/api/services"
 )
 
@@ -24,6 +25,8 @@ func SetTimetableHandler(r *mux.Router, timetableService *services.TimetableServ
 
 	rt := r.PathPrefix("/course/").Subrouter()
 
+	rt.Use(middleware.Protect)
+
 	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
 	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
 	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
@@ -31,7 +34,7 @@ func SetTimetableHandler(r *mux.Router, timetableService *services.TimetableServ
 }
 
 func (h *TimetableHandler) list(w http.ResponseWriter, req *http.Request) {
-	list, err := h.timetableService.List()
+	list, err := h.timetableService.List(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error listing courses")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -58,7 +61,7 @@ func (h *TimetableHandler) add(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	eNew, err := h.timetableService.Add(e)
+	eNew, err := h.timetableService.Add(req.Context(), e)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err":    err,
@@ -106,7 +109,7 @@ func (h *TimetableHandler) edit(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	eNew, err := h.timetableService.Edit(oid, e)
+	eNew, err := h.timetableService.Edit(req.Context(), oid, e)
 	if err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error editing course")
 		w.WriteHeader(http.StatusNotFound)
@@ -146,7 +149,7 @@ func (h *TimetableHandler) remove(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := h.timetableService.Remove(oid); err == mgo.ErrNotFound {
+	if err := h.timetableService.Remove(req.Context(), oid); err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error removing course")
 		w.WriteHeader(http.StatusNotFound)
 		return
