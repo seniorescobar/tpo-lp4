@@ -30,13 +30,33 @@ func register(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := container.AuthService.Register(u); err != nil {
+	uNew, err := container.AuthService.Register(u)
+	if err != nil {
 		log.WithField("err", err).Error("error registering user")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	tokenString, err := generateToken(uNew)
+	if err != nil {
+		log.WithField("err", err).Error("error signing token")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	tNew, err := json.Marshal(struct {
+		Token string `json:"token"`
+	}{tokenString})
+
+	if err != nil {
+		log.WithField("err", err).Error("error encoding token")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	w.Write(tNew)
 }
 
 func signin(w http.ResponseWriter, req *http.Request) {
@@ -58,13 +78,7 @@ func signin(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":    user.Id,
-		"email": user.Email,
-		"exp":   time.Now().Add(24 * time.Hour).Unix(),
-	})
-
-	tokenString, err := token.SignedString(secret)
+	tokenString, err := generateToken(user)
 	if err != nil {
 		log.WithField("err", err).Error("error signing token")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -84,4 +98,14 @@ func signin(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(tNew)
+}
+
+func generateToken(u *entities.User) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":    u.Id,
+		"email": u.Email,
+		"exp":   time.Now().Add(24 * time.Hour).Unix(),
+	})
+
+	return token.SignedString(secret)
 }
