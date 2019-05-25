@@ -14,16 +14,16 @@ type IEventRepo interface {
 }
 
 type EventRepo struct {
-	db *mgo.Database
+	c *mgo.Collection
 }
 
 func NewEventRepo(db *mgo.Database) *EventRepo {
-	return &EventRepo{db}
+	return &EventRepo{db.C("event")}
 }
 
 func (r *EventRepo) List(uid bson.ObjectId) ([]entities.Event, error) {
 	var events []entities.Event
-	if err := r.db.C("event").Find(bson.M{"user_id": uid}).All(&events); err != nil {
+	if err := r.c.Find(bson.M{"user_id": uid}).All(&events); err != nil {
 		return nil, err
 	}
 
@@ -40,7 +40,7 @@ func (r *EventRepo) Add(uid bson.ObjectId, e *entities.Event) (*entities.Event, 
 		Description: e.Description,
 	}
 
-	if err := r.db.C("event").Insert(eNew); err != nil {
+	if err := r.c.Insert(eNew); err != nil {
 		return nil, err
 	}
 
@@ -55,12 +55,12 @@ func (r *EventRepo) Edit(uid bson.ObjectId, id bson.ObjectId, e *entities.Event)
 		"description": e.Description,
 	}
 
-	if err := r.db.C("event").Update(bson.M{"_id": id, "user_id": uid}, bson.M{"$set": mNew}); err != nil {
+	if err := r.c.Update(bson.M{"_id": id, "user_id": uid}, bson.M{"$set": mNew}); err != nil {
 		return nil, err
 	}
 
 	var eNew entities.Event
-	if err := r.db.C("event").Find(bson.M{"_id": id, "user_id": uid}).One(&eNew); err != nil {
+	if err := r.c.Find(bson.M{"_id": id, "user_id": uid}).One(&eNew); err != nil {
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func (r *EventRepo) Edit(uid bson.ObjectId, id bson.ObjectId, e *entities.Event)
 }
 
 func (r *EventRepo) Remove(uid bson.ObjectId, id bson.ObjectId) error {
-	if err := r.db.C("event").Remove(bson.M{"_id": id, "user_id": uid}); err != nil {
+	if err := r.c.Remove(bson.M{"_id": id, "user_id": uid}); err != nil {
 		return err
 	}
 

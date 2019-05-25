@@ -14,16 +14,16 @@ type ITodoRepo interface {
 }
 
 type TodoRepo struct {
-	db *mgo.Database
+	c *mgo.Collection
 }
 
 func NewTodoRepo(db *mgo.Database) *TodoRepo {
-	return &TodoRepo{db}
+	return &TodoRepo{db.C("todo")}
 }
 
 func (r *TodoRepo) List(uid bson.ObjectId) ([]entities.Todo, error) {
 	var todos []entities.Todo
-	if err := r.db.C("todo").Find(bson.M{"user_id": uid}).All(&todos); err != nil {
+	if err := r.c.Find(bson.M{"user_id": uid}).All(&todos); err != nil {
 		return nil, err
 	}
 
@@ -37,7 +37,7 @@ func (r *TodoRepo) Add(uid bson.ObjectId, t *entities.Todo) (*entities.Todo, err
 		Description: t.Description,
 	}
 
-	if err := r.db.C("todo").Insert(tNew); err != nil {
+	if err := r.c.Insert(tNew); err != nil {
 		return nil, err
 	}
 
@@ -45,12 +45,12 @@ func (r *TodoRepo) Add(uid bson.ObjectId, t *entities.Todo) (*entities.Todo, err
 }
 
 func (r *TodoRepo) Edit(uid bson.ObjectId, id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
-	if err := r.db.C("todo").Update(bson.M{"_id": id, "user_id": uid}, bson.M{"$set": bson.M{"description": t.Description}}); err != nil {
+	if err := r.c.Update(bson.M{"_id": id, "user_id": uid}, bson.M{"$set": bson.M{"description": t.Description}}); err != nil {
 		return nil, err
 	}
 
 	var tNew entities.Todo
-	if err := r.db.C("todo").Find(bson.M{"_id": id, "user_id": uid}).One(&tNew); err != nil {
+	if err := r.c.Find(bson.M{"_id": id, "user_id": uid}).One(&tNew); err != nil {
 		return nil, err
 	}
 
@@ -58,7 +58,7 @@ func (r *TodoRepo) Edit(uid bson.ObjectId, id bson.ObjectId, t *entities.Todo) (
 }
 
 func (r *TodoRepo) Remove(uid bson.ObjectId, id bson.ObjectId) error {
-	if err := r.db.C("todo").Remove(bson.M{"_id": id, "user_id": uid}); err != nil {
+	if err := r.c.Remove(bson.M{"_id": id, "user_id": uid}); err != nil {
 		return err
 	}
 

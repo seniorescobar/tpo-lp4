@@ -13,7 +13,7 @@ func NewAuthService(authRepo repositories.IUserRepo) *AuthService {
 	return &AuthService{authRepo}
 }
 
-func (s *AuthService) Register(u *entities.User) error {
+func (s *AuthService) Register(u *entities.User) (*entities.User, error) {
 	return s.authRepo.Register(u)
 }
 

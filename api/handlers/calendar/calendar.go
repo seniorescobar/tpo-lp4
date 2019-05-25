@@ -8,32 +8,24 @@ import (
 	log "github.com/sirupsen/logrus"
 	mgo "gopkg.in/mgo.v2"
 
+	"bitbucket.org/aj5110/tpo-lp4/api/container"
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/helpers"
 	"bitbucket.org/aj5110/tpo-lp4/api/middleware"
-	"bitbucket.org/aj5110/tpo-lp4/api/services"
 )
 
-type CalendarHandler struct {
-	calendarService *services.CalendarService
-}
-
-func SetCalendarHandler(r *mux.Router, calendarService *services.CalendarService) {
-	h := CalendarHandler{
-		calendarService,
-	}
-
+func SetCalendarHandler(r *mux.Router) {
 	rt := r.PathPrefix("/event/").Subrouter()
 
 	rt.Use(middleware.Protect)
 
-	rt.HandleFunc("/", h.list).Methods(http.MethodGet)
-	rt.HandleFunc("/", h.add).Methods(http.MethodPost)
-	rt.HandleFunc("/{id}", h.edit).Methods(http.MethodPut)
-	rt.HandleFunc("/{id}", h.remove).Methods(http.MethodDelete)
+	rt.HandleFunc("/", list).Methods(http.MethodGet)
+	rt.HandleFunc("/", add).Methods(http.MethodPost)
+	rt.HandleFunc("/{id}", edit).Methods(http.MethodPut)
+	rt.HandleFunc("/{id}", remove).Methods(http.MethodDelete)
 }
 
-func (h *CalendarHandler) list(w http.ResponseWriter, req *http.Request) {
+func list(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -41,7 +33,7 @@ func (h *CalendarHandler) list(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	list, err := h.calendarService.List(uid)
+	list, err := container.CalendarService.List(uid)
 	if err != nil {
 		log.WithField("err", err).Error("error listing events")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -60,7 +52,7 @@ func (h *CalendarHandler) list(w http.ResponseWriter, req *http.Request) {
 	w.Write(listJ)
 }
 
-func (h *CalendarHandler) add(w http.ResponseWriter, req *http.Request) {
+func add(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -75,7 +67,7 @@ func (h *CalendarHandler) add(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	eNew, err := h.calendarService.Add(uid, e)
+	eNew, err := container.CalendarService.Add(uid, e)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"err":   err,
@@ -100,7 +92,7 @@ func (h *CalendarHandler) add(w http.ResponseWriter, req *http.Request) {
 	w.Write(eNewJ)
 }
 
-func (h *CalendarHandler) edit(w http.ResponseWriter, req *http.Request) {
+func edit(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -130,7 +122,7 @@ func (h *CalendarHandler) edit(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	eNew, err := h.calendarService.Edit(uid, oid, e)
+	eNew, err := container.CalendarService.Edit(uid, oid, e)
 	if err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error editing event")
 		w.WriteHeader(http.StatusNotFound)
@@ -157,7 +149,7 @@ func (h *CalendarHandler) edit(w http.ResponseWriter, req *http.Request) {
 	w.Write(eNewJ)
 }
 
-func (h *CalendarHandler) remove(w http.ResponseWriter, req *http.Request) {
+func remove(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -177,7 +169,7 @@ func (h *CalendarHandler) remove(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := h.calendarService.Remove(uid, oid); err == mgo.ErrNotFound {
+	if err := container.CalendarService.Remove(uid, oid); err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error removing event")
 		w.WriteHeader(http.StatusNotFound)
 		return
