@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -61,4 +62,16 @@ func Protect(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, req)
 	})
+}
+
+// helpers
+
+func GetUID(req *http.Request) (bson.ObjectId, error) {
+	v := req.Context().Value("user")
+	u, ok := v.(entities.User)
+	if !ok {
+		return "", errors.New("error asserting ctx user")
+	}
+
+	return u.Id, nil
 }

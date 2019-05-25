@@ -7,11 +7,10 @@ import (
 )
 
 type Event struct {
-	Id          bson.ObjectId `bson:"_id" json:"_id""`
+	Id          bson.ObjectId `bson:"_id" json:"_id"`
+	UserId      bson.ObjectId `bson:"user_id" json:"-"`
 	Name        string        `json:"name"`
 	StartDt     time.Time     `json:"start_dt"`
 	EndDt       time.Time     `json:"end_dt"`
 	Description string        `json:"description"`
-
-	// Duration    time.Duration `json:"duration"`
 }

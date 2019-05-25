@@ -2,16 +2,15 @@ package repositories
 
 import (
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
-	"github.com/stretchr/testify/mock"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
 type ICalendarRepo interface {
-	List() ([]entities.Event, error)
-	Add(*entities.Event) (*entities.Event, error)
-	Edit(bson.ObjectId, *entities.Event) (*entities.Event, error)
-	Remove(bson.ObjectId) error
+	List(uid bson.ObjectId) ([]entities.Event, error)
+	Add(uid bson.ObjectId, e *entities.Event) (*entities.Event, error)
+	Edit(uid bson.ObjectId, id bson.ObjectId, e *entities.Event) (*entities.Event, error)
+	Remove(uid bson.ObjectId, id bson.ObjectId) error
 }
 
 type CalendarRepo struct {
@@ -22,18 +21,19 @@ func NewCalendarRepo(db *mgo.Database) *CalendarRepo {
 	return &CalendarRepo{db}
 }
 
-func (r *CalendarRepo) List() ([]entities.Event, error) {
+func (r *CalendarRepo) List(uid bson.ObjectId) ([]entities.Event, error) {
 	var events []entities.Event
-	if err := r.db.C("calendar").Find(nil).All(&events); err != nil {
+	if err := r.db.C("calendar").Find(bson.M{"user_id": uid}).All(&events); err != nil {
 		return nil, err
 	}
 
 	return events, nil
 }
 
-func (r *CalendarRepo) Add(e *entities.Event) (*entities.Event, error) {
+func (r *CalendarRepo) Add(uid bson.ObjectId, e *entities.Event) (*entities.Event, error) {
 	eNew := &entities.Event{
 		Id:          bson.NewObjectId(),
+		UserId:      uid,
 		Name:        e.Name,
 		StartDt:     e.StartDt,
 		EndDt:       e.EndDt,
@@ -47,56 +47,30 @@ func (r *CalendarRepo) Add(e *entities.Event) (*entities.Event, error) {
 	return eNew, nil
 }
 
-func (r *CalendarRepo) Edit(id bson.ObjectId, e *entities.Event) (*entities.Event, error) {
-	eNew := &entities.Event{
-		Id:          id,
-		Name:        e.Name,
-		StartDt:     e.StartDt,
-		EndDt:       e.EndDt,
-		Description: e.Description,
+func (r *CalendarRepo) Edit(uid bson.ObjectId, id bson.ObjectId, e *entities.Event) (*entities.Event, error) {
+	mNew := bson.M{
+		"name":        e.Name,
+		"start_dt":    e.StartDt,
+		"end_dt":      e.EndDt,
+		"description": e.Description,
 	}
 
-	if err := r.db.C("calendar").UpdateId(id, eNew); err != nil {
+	if err := r.db.C("calendar").Update(bson.M{"_id": id, "user_id": uid}, bson.M{"$set": mNew}); err != nil {
 		return nil, err
 	}
 
-	return eNew, nil
+	var eNew entities.Event
+	if err := r.db.C("calendar").Find(bson.M{"_id": id, "user_id": uid}).One(&eNew); err != nil {
+		return nil, err
+	}
+
+	return &eNew, nil
 }
 
-func (r *CalendarRepo) Remove(id bson.ObjectId) error {
-	if err := r.db.C("calendar").RemoveId(id); err != nil {
+func (r *CalendarRepo) Remove(uid bson.ObjectId, id bson.ObjectId) error {
+	if err := r.db.C("calendar").Remove(bson.M{"_id": id, "user_id": uid}); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// MOCK
-
-type CalendarRepoMock struct {
-	mock.Mock
-}
-
-func NewCalendarRepoMock() *CalendarRepoMock {
-	return new(CalendarRepoMock)
-}
-
-func (m *CalendarRepoMock) List() ([]entities.Event, error) {
-	args := m.Called()
-	return args.Get(0).([]entities.Event), args.Error(1)
-}
-
-func (m *CalendarRepoMock) Add(e *entities.Event) (*entities.Event, error) {
-	args := m.Called(e)
-	return args.Get(0).(*entities.Event), args.Error(1)
-}
-
-func (m *CalendarRepoMock) Edit(id bson.ObjectId, e *entities.Event) (*entities.Event, error) {
-	args := m.Called(id, e)
-	return args.Get(0).(*entities.Event), args.Error(1)
-}
-
-func (m *CalendarRepoMock) Remove(id bson.ObjectId) error {
-	args := m.Called(id)
-	return args.Error(0)
 }

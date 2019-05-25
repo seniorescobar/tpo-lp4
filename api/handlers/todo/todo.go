@@ -34,7 +34,12 @@ func SetTodoHandler(r *mux.Router, todoService *services.TodoService) {
 }
 
 func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
-	uid := req.Context().Value("user").(entities.User).Id
+	uid, err := middleware.GetUID(req)
+	if err != nil {
+		log.WithField("err", err).Error("error getting uid from req ctx")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	list, err := h.todoService.List(uid)
 	if err != nil {
@@ -56,7 +61,12 @@ func (h *TodoHandler) list(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
-	uid := req.Context().Value("user").(entities.User).Id
+	uid, err := middleware.GetUID(req)
+	if err != nil {
+		log.WithField("err", err).Error("error getting uid from req ctx")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	t := new(entities.Todo)
 	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
@@ -91,7 +101,12 @@ func (h *TodoHandler) add(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
-	uid := req.Context().Value("user").(entities.User).Id
+	uid, err := middleware.GetUID(req)
+	if err != nil {
+		log.WithField("err", err).Error("error getting uid from req ctx")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	id := mux.Vars(req)["id"]
 
@@ -143,7 +158,12 @@ func (h *TodoHandler) edit(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *TodoHandler) remove(w http.ResponseWriter, req *http.Request) {
-	uid := req.Context().Value("user").(entities.User).Id
+	uid, err := middleware.GetUID(req)
+	if err != nil {
+		log.WithField("err", err).Error("error getting uid from req ctx")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	id := mux.Vars(req)["id"]
 
