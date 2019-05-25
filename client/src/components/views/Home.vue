@@ -10,20 +10,22 @@
                     <chip class="todo__action" label="Remove"/>
                 </div>
                 <div class="todo__container">
-                    <div v-for="todo in mockData.todos" :key="todo.id" class="todo">{{ todo.description }}</div>
+                    <div v-for="todo in todos" :key="todo.id" class="todo">{{ todo.description }}</div>
                 </div>
             </div>
         </div>
 
         <md-dialog :md-active.sync="isDialogShown" class="">
-            test
+            <textarea ref="input" class="todo__input" v-model="description"/>
+            <button class="todo__post" @click="post">POST</button>
         </md-dialog>
     </div>
 </template>
 
 <script>
 import { Chip, Input } from 'design-system'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState, mapActions } from 'vuex'
+import api from 'api-client'
 
 export default {
     components: {
@@ -33,17 +35,34 @@ export default {
     data () {
         return {
             isDialogShown: false,
-            calendarData: {},
+            description: '',
         }
     },
     computed: {
+        ...mapState([ 'todos' ]),
         ...mapGetters({
-            mockData: 'mockData'
         }),
     },
     methods: {
+        ...mapActions(['fetchAndSetTodos']),
         openDialog () {
             this.isDialogShown = true
+            setTimeout(() => {
+                this.$refs.input.focus()
+            }, 250)
+        },
+        post () {
+            if (!this.description.length) return
+
+            const payload = { description: this.description }
+            return api
+                .post('todo/', payload)
+                .then(res => {
+                    this.fetchAndSetTodos()
+                    this.description = ''
+                    this.isDialogShown = false
+                })
+                .catch((err) => console.log(err))
         }
     }
 }
@@ -88,6 +107,22 @@ export default {
     &__container {
         display: flex;
         margin: 0 -16px;
+    }
+    &__input {
+        background-color: transparent;
+        outline: none;
+        margin: 12px;
+        resize: none;
+        border: none;
+        font-size: 12px;
+        color: @white;
+    }
+    &__post {
+        background: @very-light-green;
+        outline: none;
+        border: none;
+        color: @black;
+        height: 28px;
     }
 }
 </style>

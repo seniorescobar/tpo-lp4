@@ -18,6 +18,7 @@ export default {
 #app {
     font-family: @regular-font;
     color: white;
+    min-height: 100vh;
 }
 
 .md-theme-default.md-theme-default {
