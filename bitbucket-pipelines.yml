@@ -10,6 +10,7 @@ pipelines:
   branches:
     master:
       - step:
+          deployment: production
           script: # Modify the commands below to build your repository.
             - PACKAGE_PATH="${GOPATH}/src/bitbucket.org/${BITBUCKET_REPO_FULL_NAME}"
             - mkdir -pv "${PACKAGE_PATH}"
