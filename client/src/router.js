@@ -1,20 +1,39 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from './components/views/Home'
-import Food from './components/views/Food'
-import Events from './components/views/Events'
-import Bus from './components/views/Bus'
+import { Login, Register, Main, Home, Food, Events, Bus } from './components/views'
 
 Vue.use(VueRouter)
 
-export default new VueRouter({
+const router =  new VueRouter({
     mode: 'history',
     base: __dirname,
     routes: [
-        { path: '/', name: 'home', component: Home },
-        { path: '/home', redirect: '/' },
-        { path: '/food', name: 'food', component: Food },
-        { path: '/events', name: 'events', component: Events },
-        { path: '/bus', name: 'bus', component: Bus },
+        { path: '/app', component: Main,
+            children: [
+                { path: 'home', name: 'home', component: Home },
+                { path: 'food', name: 'food', component: Food },
+                { path: 'events', name: 'events', component: Events },
+                { path: 'bus', name: 'bus', component: Bus },
+                { path: '*', redirect: '/app/home' },
+            ]
+        },
+        { path: '/register', name: 'register', component: Register },
+        { path: '/login', name: 'login', component: Login },
+        { path: '*', redirect: '/app' },
     ]
 })
+
+const publicPages = ['login', 'register']
+
+router.beforeEach((to, from, next) => {
+    const authRequired = !publicPages.includes(to.name)
+    const loggedIn = localStorage.getItem('credentials')
+  
+    if (authRequired && !loggedIn) {
+        return next({ path: '/login', query: { destUrl: to.path } })
+    }
+
+    next()
+})
+
+export default router
