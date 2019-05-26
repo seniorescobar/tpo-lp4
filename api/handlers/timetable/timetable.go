@@ -17,7 +17,7 @@ import (
 func SetTimetableHandler(r *mux.Router) {
 	rt := r.PathPrefix("/course/").Subrouter()
 
-	rt.Use(middleware.Protect)
+	rt.Use(middleware.CheckUser)
 
 	rt.HandleFunc("/", list).Methods(http.MethodGet)
 	rt.HandleFunc("/", add).Methods(http.MethodPost)

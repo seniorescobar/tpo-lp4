@@ -30,6 +30,7 @@ func (r *UserRepo) Register(u *entities.User) (*entities.User, error) {
 		Id:       bson.NewObjectId(),
 		Email:    u.Email,
 		Password: string(hashedPassword),
+		Role:     u.Role,
 	}
 
 	if err := r.c.Insert(uNew); err != nil {

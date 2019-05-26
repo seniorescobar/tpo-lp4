@@ -6,7 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type Event struct {
+type CalendarEvent struct {
 	Id          bson.ObjectId `bson:"_id" json:"_id"`
 	UserId      bson.ObjectId `bson:"user_id" json:"-"`
 	Name        string        `json:"name"`

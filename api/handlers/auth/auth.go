@@ -10,19 +10,11 @@ import (
 	"bitbucket.org/aj5110/tpo-lp4/api/container"
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/mux"
 )
 
 var secret = []byte("secret")
 
-func SetAuthHandler(r *mux.Router) {
-	rt := r.PathPrefix("/auth/").Subrouter()
-
-	rt.HandleFunc("/register/", register).Methods(http.MethodPost)
-	rt.HandleFunc("/signin/", signin).Methods(http.MethodPost)
-}
-
-func register(w http.ResponseWriter, req *http.Request) {
+func Register(w http.ResponseWriter, req *http.Request) {
 	u := new(entities.User)
 	if err := json.NewDecoder(req.Body).Decode(u); err != nil {
 		log.WithField("err", err).Error("error decoding user")
@@ -59,7 +51,7 @@ func register(w http.ResponseWriter, req *http.Request) {
 	w.Write(tNew)
 }
 
-func signin(w http.ResponseWriter, req *http.Request) {
+func Signin(w http.ResponseWriter, req *http.Request) {
 	a := &struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -100,10 +92,36 @@ func signin(w http.ResponseWriter, req *http.Request) {
 	w.Write(tNew)
 }
 
+func AdminRegister(w http.ResponseWriter, req *http.Request) {
+	u := new(entities.User)
+	if err := json.NewDecoder(req.Body).Decode(u); err != nil {
+		log.WithField("err", err).Error("error decoding user")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// TODO validation
+	if u.Role == "" {
+		log.Error("empty role")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if _, err := container.AuthService.Register(u); err != nil {
+		log.WithField("err", err).Error("error registering user")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func generateToken(u *entities.User) (string, error) {
+	// TODO map -> struct
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":    u.Id,
 		"email": u.Email,
+		"role":  u.Role,
 		"exp":   time.Now().Add(24 * time.Hour).Unix(),
 	})
 

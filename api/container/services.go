@@ -5,15 +5,17 @@ import (
 )
 
 var (
+	AuthService      *services.AuthService
 	TodoService      *services.TodoService
 	CalendarService  *services.CalendarService
 	TimetableService *services.TimetableService
-	AuthService      *services.AuthService
+	EventService     *services.EventService
 )
 
 func initServices() {
-	TodoService = services.NewTodoService(TodoRepo)
-	CalendarService = services.NewCalendarService(EventRepo)
-	TimetableService = services.NewTimetableService(CourseRepo)
 	AuthService = services.NewAuthService(UserRepo)
+	TodoService = services.NewTodoService(TodoRepo)
+	CalendarService = services.NewCalendarService(CalendarEventRepo)
+	TimetableService = services.NewTimetableService(CourseRepo)
+	EventService = services.NewEventService(EventRepo)
 }

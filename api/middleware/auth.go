@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -13,6 +14,53 @@ import (
 )
 
 var secret = []byte("secret")
+
+func CheckUser(next http.Handler) http.Handler {
+	return Protect(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if err := checkHelper("user", req.Context()); err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, req)
+	}))
+}
+
+func CheckManager(next http.Handler) http.Handler {
+	return Protect(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if err := checkHelper("manager", req.Context()); err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, req)
+	}))
+}
+
+func CheckAdmin(next http.Handler) http.Handler {
+	return Protect(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if err := checkHelper("admin", req.Context()); err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, req)
+	}))
+}
+
+func checkHelper(role string, ctx context.Context) error {
+	u, err := GetUser(ctx)
+	if err != nil {
+		return err
+	}
+
+	if u.Role != role {
+		return fmt.Errorf("user's role is %s, not %s", u.Role, role)
+	}
+
+	return nil
+}
 
 func Protect(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -55,9 +103,16 @@ func Protect(next http.Handler) http.Handler {
 			return
 		}
 
+		role, ok := claims["role"].(string)
+		if !ok {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		req = req.WithContext(context.WithValue(req.Context(), "user", entities.User{
 			Id:    bson.ObjectIdHex(id),
 			Email: email,
+			Role:  role,
 		}))
 
 		next.ServeHTTP(w, req)
@@ -66,12 +121,20 @@ func Protect(next http.Handler) http.Handler {
 
 // helpers
 
-func GetUID(ctx context.Context) (bson.ObjectId, error) {
+func GetUser(ctx context.Context) (*entities.User, error) {
 	v := ctx.Value("user")
 	u, ok := v.(entities.User)
 	if !ok {
-		return "", errors.New("error asserting ctx user")
+		return nil, errors.New("error asserting ctx user")
 	}
 
+	return &u, nil
+}
+
+func GetUID(ctx context.Context) (bson.ObjectId, error) {
+	u, err := GetUser(ctx)
+	if err != nil {
+		return "", err
+	}
 	return u.Id, nil
 }

@@ -17,7 +17,7 @@ import (
 func SetTodoHandler(r *mux.Router) {
 	rt := r.PathPrefix("/todo/").Subrouter()
 
-	rt.Use(middleware.Protect)
+	rt.Use(middleware.CheckUser)
 
 	rt.HandleFunc("/", list).Methods(http.MethodGet)
 	rt.HandleFunc("/", add).Methods(http.MethodPost)
