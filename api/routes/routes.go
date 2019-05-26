@@ -34,10 +34,10 @@ func initApiRoutes(r *mux.Router) {
 	authRouter := apiRouter.PathPrefix("/auth/").Subrouter()
 	authRouter.HandleFunc("/register/", auth.Register).Methods(http.MethodPost)
 	authRouter.HandleFunc("/signin/", auth.Signin).Methods(http.MethodPost)
-	authRouter.Handle("/admin/register/", middleware.CheckAdmin(http.HandlerFunc(auth.AdminRegister))).Methods(http.MethodPost)
+	authRouter.Handle("/password/", middleware.Protect(http.HandlerFunc(auth.ChangePassword))).Methods(http.MethodPost)
 
 	// todo
-	todoRouter := r.PathPrefix("/todo/").Subrouter()
+	todoRouter := apiRouter.PathPrefix("/todo/").Subrouter()
 	todoRouter.Use(middleware.CheckUser)
 	todoRouter.HandleFunc("/", todo.List).Methods(http.MethodGet)
 	todoRouter.HandleFunc("/", todo.Add).Methods(http.MethodPost)
@@ -45,7 +45,7 @@ func initApiRoutes(r *mux.Router) {
 	todoRouter.HandleFunc("/{id}", todo.Remove).Methods(http.MethodDelete)
 
 	// calendar
-	calendarRouter := r.PathPrefix("/calendar-event/").Subrouter()
+	calendarRouter := apiRouter.PathPrefix("/calendar-event/").Subrouter()
 	calendarRouter.Use(middleware.CheckUser)
 	calendarRouter.HandleFunc("/", calendar.List).Methods(http.MethodGet)
 	calendarRouter.HandleFunc("/", calendar.Add).Methods(http.MethodPost)
@@ -53,7 +53,7 @@ func initApiRoutes(r *mux.Router) {
 	calendarRouter.HandleFunc("/{id}", calendar.Remove).Methods(http.MethodDelete)
 
 	// timetable
-	timetableRouter := r.PathPrefix("/course/").Subrouter()
+	timetableRouter := apiRouter.PathPrefix("/course/").Subrouter()
 	timetableRouter.Use(middleware.CheckUser)
 	timetableRouter.HandleFunc("/", timetable.List).Methods(http.MethodGet)
 	timetableRouter.HandleFunc("/", timetable.Add).Methods(http.MethodPost)

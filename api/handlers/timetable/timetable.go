@@ -43,20 +43,14 @@ func Add(w http.ResponseWriter, req *http.Request) {
 
 	eNew, err := container.TimetableService.Add(req.Context(), e)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err":    err,
-			"course": e,
-		}).Error("error adding course")
+		log.WithFields(log.Fields{"err": err, "course": e}).Error("error adding course")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	eNewJ, err := json.Marshal(eNew)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err":        err,
-			"course new": eNew,
-		}).Error("error encoding added course")
+		log.WithFields(log.Fields{"err": err, "course new": eNew}).Error("error encoding added course")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -71,20 +65,14 @@ func Edit(w http.ResponseWriter, req *http.Request) {
 
 	oid, err := helpers.ObjectIdHex(id)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-			"id":  id,
-		}).Error("error decoding course id to edit")
+		log.WithFields(log.Fields{"err": err, "id": id}).Error("error decoding course id to edit")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	e := new(entities.Course)
 	if err := json.NewDecoder(req.Body).Decode(e); err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-			"id":  id,
-		}).Error("error decoding course to edit")
+		log.WithFields(log.Fields{"err": err, "id": id}).Error("error decoding course to edit")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -103,10 +91,7 @@ func Edit(w http.ResponseWriter, req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	eNewJ, err := json.Marshal(eNew)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err":           err,
-			"timetable new": eNew,
-		}).Error("error encoding edited course")
+		log.WithFields(log.Fields{"err": err, "timetable new": eNew}).Error("error encoding edited course")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -121,10 +106,7 @@ func Remove(w http.ResponseWriter, req *http.Request) {
 
 	oid, err := helpers.ObjectIdHex(id)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-			"id":  id,
-		}).Error("error decoding course to remove")
+		log.WithFields(log.Fields{"err": err, "id": id}).Error("error decoding course to remove")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

@@ -3,12 +3,12 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/container"
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
+	"bitbucket.org/aj5110/tpo-lp4/api/middleware"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -92,23 +92,27 @@ func Signin(w http.ResponseWriter, req *http.Request) {
 	w.Write(tNew)
 }
 
-func AdminRegister(w http.ResponseWriter, req *http.Request) {
-	u := new(entities.User)
-	if err := json.NewDecoder(req.Body).Decode(u); err != nil {
-		log.WithField("err", err).Error("error decoding user")
+func ChangePassword(w http.ResponseWriter, req *http.Request) {
+	user, err := middleware.GetUser(req.Context())
+	if err != nil {
+		log.WithField("err", err).Error("error getting user from ctx")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	p := struct {
+		OldPassword string `json:"old_password"`
+		NewPassword string `json:"new_password"`
+	}{}
+
+	if err := json.NewDecoder(req.Body).Decode(&p); err != nil {
+		log.WithField("err", err).Error("error decoding passwords")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// TODO validation
-	if u.Role == "" {
-		log.Error("empty role")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if _, err := container.AuthService.Register(u); err != nil {
-		log.WithField("err", err).Error("error registering user")
+	if err := container.AuthService.ChangePassword(user.Email, p.OldPassword, p.NewPassword); err != nil {
+		log.WithField("err", err).Error("error changing password")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -122,7 +126,7 @@ func generateToken(u *entities.User) (string, error) {
 		"id":    u.Id,
 		"email": u.Email,
 		"role":  u.Role,
-		"exp":   time.Now().Add(24 * time.Hour).Unix(),
+		// "exp":   time.Now().Add(24 * time.Hour).Unix(),
 	})
 
 	return token.SignedString(secret)
