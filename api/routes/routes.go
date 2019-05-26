@@ -7,19 +7,11 @@ import (
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/calendar"
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/timetable"
 	"bitbucket.org/aj5110/tpo-lp4/api/handlers/todo"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
 func InitRoutes() *mux.Router {
 	r := mux.NewRouter()
-
-	// temporary workaround
-	r.Use(handlers.CORS(
-		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
-		handlers.AllowedMethods([]string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}),
-		handlers.AllowedOrigins([]string{"*"}),
-	))
 
 	initStaticRoutes(r)
 	initApiRoutes(r)
