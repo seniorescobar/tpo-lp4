@@ -36,9 +36,29 @@ func initApiRoutes(r *mux.Router) {
 	authRouter.HandleFunc("/signin/", auth.Signin).Methods(http.MethodPost)
 	authRouter.Handle("/admin/register/", middleware.CheckAdmin(http.HandlerFunc(auth.AdminRegister))).Methods(http.MethodPost)
 
-	todo.SetTodoHandler(apiRouter)
-	calendar.SetCalendarHandler(apiRouter)
-	timetable.SetTimetableHandler(apiRouter)
+	// todo
+	todoRouter := r.PathPrefix("/todo/").Subrouter()
+	todoRouter.Use(middleware.CheckUser)
+	todoRouter.HandleFunc("/", todo.List).Methods(http.MethodGet)
+	todoRouter.HandleFunc("/", todo.Add).Methods(http.MethodPost)
+	todoRouter.HandleFunc("/{id}", todo.Edit).Methods(http.MethodPut)
+	todoRouter.HandleFunc("/{id}", todo.Remove).Methods(http.MethodDelete)
+
+	// calendar
+	calendarRouter := r.PathPrefix("/calendar-event/").Subrouter()
+	calendarRouter.Use(middleware.CheckUser)
+	calendarRouter.HandleFunc("/", calendar.List).Methods(http.MethodGet)
+	calendarRouter.HandleFunc("/", calendar.Add).Methods(http.MethodPost)
+	calendarRouter.HandleFunc("/{id}", calendar.Edit).Methods(http.MethodPut)
+	calendarRouter.HandleFunc("/{id}", calendar.Remove).Methods(http.MethodDelete)
+
+	// timetable
+	timetableRouter := r.PathPrefix("/course/").Subrouter()
+	timetableRouter.Use(middleware.CheckUser)
+	timetableRouter.HandleFunc("/", timetable.List).Methods(http.MethodGet)
+	timetableRouter.HandleFunc("/", timetable.Add).Methods(http.MethodPost)
+	timetableRouter.HandleFunc("/{id}", timetable.Edit).Methods(http.MethodPut)
+	timetableRouter.HandleFunc("/{id}", timetable.Remove).Methods(http.MethodDelete)
 
 	// event
 	eventRouter := apiRouter.PathPrefix("/event/").Subrouter()

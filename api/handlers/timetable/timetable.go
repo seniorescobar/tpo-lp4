@@ -11,21 +11,9 @@ import (
 	"bitbucket.org/aj5110/tpo-lp4/api/container"
 	"bitbucket.org/aj5110/tpo-lp4/api/entities"
 	"bitbucket.org/aj5110/tpo-lp4/api/helpers"
-	"bitbucket.org/aj5110/tpo-lp4/api/middleware"
 )
 
-func SetTimetableHandler(r *mux.Router) {
-	rt := r.PathPrefix("/course/").Subrouter()
-
-	rt.Use(middleware.CheckUser)
-
-	rt.HandleFunc("/", list).Methods(http.MethodGet)
-	rt.HandleFunc("/", add).Methods(http.MethodPost)
-	rt.HandleFunc("/{id}", edit).Methods(http.MethodPut)
-	rt.HandleFunc("/{id}", remove).Methods(http.MethodDelete)
-}
-
-func list(w http.ResponseWriter, req *http.Request) {
+func List(w http.ResponseWriter, req *http.Request) {
 	list, err := container.TimetableService.List(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error listing courses")
@@ -45,7 +33,7 @@ func list(w http.ResponseWriter, req *http.Request) {
 	w.Write(listJ)
 }
 
-func add(w http.ResponseWriter, req *http.Request) {
+func Add(w http.ResponseWriter, req *http.Request) {
 	e := new(entities.Course)
 	if err := json.NewDecoder(req.Body).Decode(e); err != nil {
 		log.WithField("err", err).Error("error decoding course to add")
@@ -78,7 +66,7 @@ func add(w http.ResponseWriter, req *http.Request) {
 	w.Write(eNewJ)
 }
 
-func edit(w http.ResponseWriter, req *http.Request) {
+func Edit(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 
 	oid, err := helpers.ObjectIdHex(id)
@@ -128,7 +116,7 @@ func edit(w http.ResponseWriter, req *http.Request) {
 	w.Write(eNewJ)
 }
 
-func remove(w http.ResponseWriter, req *http.Request) {
+func Remove(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 
 	oid, err := helpers.ObjectIdHex(id)

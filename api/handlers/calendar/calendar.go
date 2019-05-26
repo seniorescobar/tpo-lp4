@@ -14,18 +14,7 @@ import (
 	"bitbucket.org/aj5110/tpo-lp4/api/middleware"
 )
 
-func SetCalendarHandler(r *mux.Router) {
-	rt := r.PathPrefix("/calendar-event/").Subrouter()
-
-	rt.Use(middleware.CheckUser)
-
-	rt.HandleFunc("/", list).Methods(http.MethodGet)
-	rt.HandleFunc("/", add).Methods(http.MethodPost)
-	rt.HandleFunc("/{id}", edit).Methods(http.MethodPut)
-	rt.HandleFunc("/{id}", remove).Methods(http.MethodDelete)
-}
-
-func list(w http.ResponseWriter, req *http.Request) {
+func List(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -52,7 +41,7 @@ func list(w http.ResponseWriter, req *http.Request) {
 	w.Write(listJ)
 }
 
-func add(w http.ResponseWriter, req *http.Request) {
+func Add(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -92,7 +81,7 @@ func add(w http.ResponseWriter, req *http.Request) {
 	w.Write(eNewJ)
 }
 
-func edit(w http.ResponseWriter, req *http.Request) {
+func Edit(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
@@ -149,7 +138,7 @@ func edit(w http.ResponseWriter, req *http.Request) {
 	w.Write(eNewJ)
 }
 
-func remove(w http.ResponseWriter, req *http.Request) {
+func Remove(w http.ResponseWriter, req *http.Request) {
 	uid, err := middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
