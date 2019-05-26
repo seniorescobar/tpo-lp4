@@ -58,20 +58,14 @@ func Add(w http.ResponseWriter, req *http.Request) {
 
 	tNew, err := container.TodoService.Add(uid, t)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err":  err,
-			"todo": t,
-		}).Error("error adding todo")
+		log.WithFields(log.Fields{"err": err, "todo": t}).Error("error adding todo")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	tNewJ, err := json.Marshal(tNew)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err":      err,
-			"todo new": tNew,
-		}).Error("error encoding added todo")
+		log.WithFields(log.Fields{"err": err, "todo new": tNew}).Error("error encoding added todo")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -82,37 +76,30 @@ func Add(w http.ResponseWriter, req *http.Request) {
 }
 
 func Edit(w http.ResponseWriter, req *http.Request) {
-	uid, err := middleware.GetUID(req.Context())
+	var err error
+
+	t := new(entities.Todo)
+	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
+		log.WithFields(log.Fields{"err": err}).Error("error decoding todo to edit")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	t.Id, err = helpers.ObjectIdHex(mux.Vars(req)["id"])
+	if err != nil {
+		log.WithFields(log.Fields{"err": err}).Error("error decoding todo id to edit")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	t.UserId, err = middleware.GetUID(req.Context())
 	if err != nil {
 		log.WithField("err", err).Error("error getting uid from req ctx")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	id := mux.Vars(req)["id"]
-
-	oid, err := helpers.ObjectIdHex(id)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-			"id":  id,
-		}).Error("error decoding todo id to edit")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	t := new(entities.Todo)
-	if err := json.NewDecoder(req.Body).Decode(t); err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-			"id":  id,
-		}).Error("error decoding todo to edit")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	tNew, err := container.TodoService.Edit(uid, oid, t)
-	if err == mgo.ErrNotFound {
+	if err := container.TodoService.Edit(t); err == mgo.ErrNotFound {
 		log.WithField("err", err).Error("error editing todo")
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -123,19 +110,16 @@ func Edit(w http.ResponseWriter, req *http.Request) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	tNewJ, err := json.Marshal(tNew)
+	tJ, err := json.Marshal(t)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err":      err,
-			"todo new": tNew,
-		}).Error("error encoding edited todo")
+		log.WithFields(log.Fields{"err": err, "todo": t}).Error("error encoding edited todo")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(tNewJ)
+	w.Write(tJ)
 }
 
 func Remove(w http.ResponseWriter, req *http.Request) {
@@ -150,10 +134,7 @@ func Remove(w http.ResponseWriter, req *http.Request) {
 
 	oid, err := helpers.ObjectIdHex(id)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-			"id":  id,
-		}).Error("error decoding todo to remove")
+		log.WithFields(log.Fields{"err": err, "id": id}).Error("error decoding todo to remove")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

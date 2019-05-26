@@ -22,8 +22,8 @@ func (s *TodoService) Add(uid bson.ObjectId, t *entities.Todo) (*entities.Todo, 
 	return s.todoRepo.Add(uid, t)
 }
 
-func (s *TodoService) Edit(uid bson.ObjectId, id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
-	return s.todoRepo.Edit(uid, id, t)
+func (s *TodoService) Edit(t *entities.Todo) error {
+	return s.todoRepo.Edit(t)
 }
 
 func (s *TodoService) Remove(uid bson.ObjectId, id bson.ObjectId) error {

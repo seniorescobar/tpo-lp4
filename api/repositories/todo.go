@@ -9,7 +9,7 @@ import (
 type ITodoRepo interface {
 	List(uid bson.ObjectId) ([]entities.Todo, error)
 	Add(uid bson.ObjectId, t *entities.Todo) (*entities.Todo, error)
-	Edit(uid bson.ObjectId, id bson.ObjectId, t *entities.Todo) (*entities.Todo, error)
+	Edit(t *entities.Todo) error
 	Remove(uid bson.ObjectId, id bson.ObjectId) error
 }
 
@@ -44,17 +44,12 @@ func (r *TodoRepo) Add(uid bson.ObjectId, t *entities.Todo) (*entities.Todo, err
 	return tNew, nil
 }
 
-func (r *TodoRepo) Edit(uid bson.ObjectId, id bson.ObjectId, t *entities.Todo) (*entities.Todo, error) {
-	if err := r.c.Update(bson.M{"_id": id, "user_id": uid}, bson.M{"$set": bson.M{"description": t.Description}}); err != nil {
-		return nil, err
+func (r *TodoRepo) Edit(t *entities.Todo) error {
+	if err := r.c.Update(bson.M{"_id": t.Id, "user_id": t.UserId}, t); err != nil {
+		return err
 	}
 
-	var tNew entities.Todo
-	if err := r.c.Find(bson.M{"_id": id, "user_id": uid}).One(&tNew); err != nil {
-		return nil, err
-	}
-
-	return &tNew, nil
+	return nil
 }
 
 func (r *TodoRepo) Remove(uid bson.ObjectId, id bson.ObjectId) error {

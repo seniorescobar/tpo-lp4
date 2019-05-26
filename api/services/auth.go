@@ -6,17 +6,21 @@ import (
 )
 
 type AuthService struct {
-	authRepo repositories.IUserRepo
+	userRepo repositories.IUserRepo
 }
 
-func NewAuthService(authRepo repositories.IUserRepo) *AuthService {
-	return &AuthService{authRepo}
+func NewAuthService(userRepo repositories.IUserRepo) *AuthService {
+	return &AuthService{userRepo}
 }
 
 func (s *AuthService) Register(u *entities.User) (*entities.User, error) {
-	return s.authRepo.Register(u)
+	return s.userRepo.Register(u)
 }
 
 func (s *AuthService) Signin(email, password string) (*entities.User, error) {
-	return s.authRepo.Signin(email, password)
+	return s.userRepo.Signin(email, password)
+}
+
+func (s *AuthService) ChangePassword(email, oldPassword, newPassword string) error {
+	return s.userRepo.ChangePassword(email, oldPassword, newPassword)
 }
