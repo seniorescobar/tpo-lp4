@@ -3,12 +3,14 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"bitbucket.org/aj5110/tpo-lp4/api/routes"
 )
 
 func main() {
 	// serve
-	log.Println("listening  on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", routes.InitRoutes()))
+	port := os.Getenv("PORT")
+	log.Println("listening on port", port)
+	log.Fatal(http.ListenAndServe(":"+port, routes.InitRoutes()))
 }
