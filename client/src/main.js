@@ -7,9 +7,14 @@ import VueMaterial from 'vue-material'
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default-dark.css'
 
-Helpers.install(Vue)
 Vue.config.productionTip = false
+Helpers.install(Vue)
 Vue.use(VueMaterial)
+
+import VCalendar from 'v-calendar'
+import 'v-calendar/lib/v-calendar.min.css'
+
+Vue.use(VCalendar);
 
 new Vue({
   store,
