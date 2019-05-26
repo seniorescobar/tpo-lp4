@@ -17,10 +17,10 @@ export default {
 
 #app {
     font-family: @regular-font;
-    color: white;
+    color: @white;
+    background: @purple;
     min-height: 100vh;
 }
-
 .md-theme-default.md-theme-default {
     background-color: @purple;
 }
