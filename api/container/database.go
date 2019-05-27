@@ -2,6 +2,7 @@ package container
 
 import (
 	"log"
+	"os"
 
 	mgo "gopkg.in/mgo.v2"
 )
@@ -11,7 +12,9 @@ var (
 )
 
 func initDB() {
-	session, err := mgo.Dial("localhost")
+	mongodb_uri := os.Getenv("MONGODB_URI")
+
+	session, err := mgo.Dial(mongodb_uri)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,5 +23,5 @@ func initDB() {
 		log.Fatal(err)
 	}
 
-	DB = session.DB("tpo")
+	DB = session.DB("")
 }

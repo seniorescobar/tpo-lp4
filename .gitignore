@@ -1,3 +1,2 @@
-vendor/
-client/
-Gopkg.lock
+go.mod
+go.sum
