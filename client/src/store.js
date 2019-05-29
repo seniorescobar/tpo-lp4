@@ -13,7 +13,7 @@ export default {
     getters: {
     },
     actions: {
-        fetchAndSetTodos ({ commit, dispatch }) {
+        fetchAndSetTodos ({ dispatch }) {
             return dispatch('fetchTodos')
                 .then(todos => dispatch('setTodos', todos))
         },
@@ -34,7 +34,7 @@ export default {
             return commit('SET_STUDENT_ID', studentId)
         },
         setStudentIdSet ({ commit}, isStudentIdSet) {
-            return commit('SET_STUDENT_ID_SET')
+            return commit('SET_STUDENT_ID_SET', setStudentIdSet)
         }
     },
     mutations: {
