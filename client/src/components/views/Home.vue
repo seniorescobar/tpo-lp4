@@ -34,8 +34,7 @@
 
 <script>
 import { Chip, Input, DialogButton } from 'design-system'
-import { mapGetters, mapState, mapActions } from 'vuex'
-import api from 'api-client'
+import { mapState, mapActions } from 'vuex'
 
 export default {
     components: {
@@ -75,7 +74,7 @@ export default {
             if (!this.description.length) return
 
             const payload = { description: this.description }
-            const res = await this.postTodo()
+            const res = await this.postTodo(payload)
             if (res) {
                 this.description = ''
                 this.isDialogShown = false

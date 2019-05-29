@@ -19,14 +19,14 @@ const router =  new VueRouter({
         },
         { path: '/register', name: 'register', component: Register },
         { path: '/login', name: 'login', component: Login },
-        { path: '*', redirect: '/app' },
+        { path: '*', redirect: '/app/home' },
     ]
 })
 
-const publicPages = ['login', 'register']
+const publicPaths = ['login', 'register']
 
 router.beforeEach((to, from, next) => {
-    const authRequired = !publicPages.includes(to.name)
+    const authRequired = !publicPaths.includes(to.name)
     const loggedIn = localStorage.getItem('user')
   
     if (authRequired && !loggedIn) {
