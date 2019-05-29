@@ -34,7 +34,7 @@ export default {
             return commit('SET_STUDENT_ID', studentId)
         },
         setStudentIdSet ({ commit}, isStudentIdSet) {
-            return commit('SET_STUDENT_ID_SET', setStudentIdSet)
+            return commit('SET_STUDENT_ID_SET', isStudentIdSet)
         }
     },
     mutations: {
