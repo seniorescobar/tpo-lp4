@@ -76,8 +76,12 @@ export default {
 
             const payload = { description: this.description }
             const res = await this.postTodo()
-            this.description = ''
-            this.isDialogShown = false
+            if (res) {
+                this.description = ''
+                this.isDialogShown = false
+            } else {
+                alert('Error in posting todo')
+            }
         }
     }
 }
