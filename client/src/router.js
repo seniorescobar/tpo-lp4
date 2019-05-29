@@ -27,10 +27,10 @@ const publicPages = ['login', 'register']
 
 router.beforeEach((to, from, next) => {
     const authRequired = !publicPages.includes(to.name)
-    const loggedIn = localStorage.getItem('credentials')
+    const loggedIn = localStorage.getItem('user')
   
     if (authRequired && !loggedIn) {
-        return next({ path: '/login', query: { destUrl: to.path } })
+        return next({ path: '/login' })
     }
 
     next()

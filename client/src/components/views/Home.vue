@@ -82,7 +82,7 @@ export default {
                     this.description = ''
                     this.isDialogShown = false
                 })
-                .catch((err) => console.log(err))
+                .catch((err) => alert('Failed to post a todo item'))
         }
     }
 }
