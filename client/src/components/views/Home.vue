@@ -64,25 +64,20 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['fetchAndSetTodos', 'setStudentId', 'setStudentIdSet']),
+        ...mapActions(['fetchAndSetTodos', 'postTodo', 'setStudentId', 'setStudentIdSet']),
         openDialog () {
             this.isDialogShown = true
             setTimeout(() => {
                 this.$refs.input.focus()
             }, 250)
         },
-        post () {
+        async post () {
             if (!this.description.length) return
 
             const payload = { description: this.description }
-            return api
-                .post('todo/', payload)
-                .then(res => {
-                    this.fetchAndSetTodos()
-                    this.description = ''
-                    this.isDialogShown = false
-                })
-                .catch((err) => alert('Failed to post a todo item'))
+            const res = await this.postTodo()
+            this.description = ''
+            this.isDialogShown = false
         }
     }
 }
