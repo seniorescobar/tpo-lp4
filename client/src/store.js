@@ -1,31 +1,34 @@
 import api from 'api-client'
+import Vue from 'vue'
+import Vuex from 'vuex'
+Vue.use(Vuex)
 
 const state = {
-    todos: [],
+    todos: [{ _id: '12312312', description: 'asdasdasd' }],
     studentId: null,
     isStudentIdSet: false,
 }
 
 const getState = () => JSON.parse(JSON.stringify(state))
 
-export default {
+export default new Vuex.Store({
     state: getState(),
-    getters: {
-    },
+    getters: {},
     actions: {
-        fetchAndSetTodos ({ dispatch }) {
-            return dispatch('fetchTodos')
-                .then(todos => dispatch('setTodos', todos))
+        async postTodo ({ dispatch }, payload) {
+            await api.post('todo', payload)
+            return dispatch('fetchAndSetTodos')
         },
-        fetchTodos () {
-            return api
-                .get('todos')
-                .then(res => res.data)
+        async deleteTodo (_, id) {
+            return await api.delete(`todo/${id}`)
         },
-        postTodo ({ dispatch }, payload) {
-            return api
-                .post('todo', payload)
-                .then(() => dispatch('fetchAndSetTodos'))
+        async fetchAndSetTodos ({ dispatch }) {
+            const todos = await dispatch('fetchTodos');
+            return await dispatch('setTodos', todos);
+        },
+        async fetchTodos () {
+            const { data } = await api.get('todo')
+            return data
         },
         setTodos ({ commit }, todos) {
             return commit('SET_TODOS', todos)
@@ -48,4 +51,4 @@ export default {
             state.isStudentIdSet = isStudentIdSet
         },
     }
-}
+})

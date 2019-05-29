@@ -1,8 +1,7 @@
 import axios from 'axios'
 
 class ApiClient {
-    constructor () {
-    }
+    constructor () {}
 
     get (path) {
         return this._makeRequest('GET', path)
@@ -23,7 +22,8 @@ class ApiClient {
     _makeRequest (method, path, data) {
         return new Promise((resolve, reject) => {
             const headers = this._headers()
-            const url = path
+            const url = `/api/${path}/`
+
             axios({ method, headers, url, data })
                 .then(response => resolve(response.data))
                 .catch(error => reject(error))
@@ -31,11 +31,12 @@ class ApiClient {
     }
 
     _headers () {
-        const user = JSON.parse(localStorage.getItem('user'))
         const headers = { 'Content-Type': 'application/json' }
+        const user = localStorage.getItem('user')
+        const token = user && JSON.parse(user).token
 
-        if (user && user.token) {
-            Object.assign(headers, { 'Authorization': 'Bearer ' + user.token })
+        if (token) {
+            Object.assign(headers, { 'Authorization': `Bearer ${token}` })
         }
 
         return headers

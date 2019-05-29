@@ -5,7 +5,7 @@
             <input class="register__credential" placeholder="Email" type="email" v-model="email"/>
             <input class="register__credential" placeholder="Password" type="password" v-model="password"/>
             <input class="register__credential" placeholder="Repeat password" type="password" v-model="passwordRepeat"/>
-            <dialog-button :disabled="!isRegisterEnabled">Log in</dialog-button>
+            <dialog-button :disabled="!isRegisterEnabled" @click="register">Sign up</dialog-button>
             <div class="register__login" @click="goToLogin">Or login!</div>
             <div v-if="errorMessage.length" class="login__error">{{ errorMessage }}</div>
         </div>
@@ -43,22 +43,23 @@ export default {
             this.$router.push('/login')
         },
         register () {
+            const self = this
             this.isRegistring = true
             this.errorMessage = ''
             const credentials = { email: this.email, password: this.password }
 
             return api
-                .post('register', credentials)
+                .post('auth/register', credentials)
                 .then(success)
                 .catch(failure)
 
-            function success (res) {
-                localStorage.setItem('user', res.data)
-                this.$router.push('/app/home')
+            function success (user) {
+                localStorage.setItem('user', JSON.stringify(user))
+                self.$router.push('/app/home')
             }
             function failure () {
-                this.isRegistring = false
-                this.errorMessage = 'Failed to log in :('
+                self.isRegistring = false
+                self.errorMessage = 'Failed to log in :('
             }
         },
     }
@@ -102,6 +103,11 @@ export default {
         text-decoration: underline;
         margin-top: 12px;
         cursor: pointer;
+    }
+    &__error {
+        text-align: center;
+        margin-top: 12px;
+        color: @pink-red;
     }
 }
 </style>

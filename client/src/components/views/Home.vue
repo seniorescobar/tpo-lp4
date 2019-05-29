@@ -17,10 +17,12 @@
             <div class="todo__wrapper">
                 <div class="todo__actions">
                     <chip class="todo__action" label="Add" @click="openDialog"/>
-                    <chip class="todo__action" label="Remove"/>
                 </div>
                 <div class="todo__container">
-                    <div v-for="todo in todos" :key="todo.id" class="todo">{{ todo.description }}</div>
+                    <div v-for="todo in todos" :key="todo._id" class="todo">
+                        <div class="todo__remove" @click="remove(todo._id)">X</div>
+                        {{ todo.description }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,7 +65,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['fetchAndSetTodos', 'postTodo', 'setStudentId', 'setStudentIdSet']),
+        ...mapActions(['fetchAndSetTodos', 'postTodo', 'deleteTodo', 'setStudentId', 'setStudentIdSet']),
         openDialog () {
             this.isDialogShown = true
             setTimeout(() => {
@@ -81,6 +83,9 @@ export default {
             } else {
                 alert('Error in posting todo')
             }
+        },
+        async remove (id) {
+            return await this.deleteTodo(id)
         }
     }
 }
@@ -104,6 +109,7 @@ export default {
 .iframe {
     background-color: @white;
     width: 100%;
+    margin-top: 64px;
     height: 460px;
 }
 
@@ -116,7 +122,15 @@ export default {
     margin: 16px;
     padding: 32px;
     box-sizing: border-box;
+    position: relative;
 
+    &__remove{
+        position: absolute;
+        color: @dolphin;
+        right: 8px;
+        top: 8px;
+        cursor: pointer;
+    }
     &__wrapper {
         overflow: scroll;
     }
@@ -130,7 +144,6 @@ export default {
     }
     &__container {
         display: flex;
-        margin: 0 -16px;
     }
     &__input {
         background-color: transparent;
