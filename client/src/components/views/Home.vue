@@ -17,10 +17,12 @@
             <div class="todo__wrapper">
                 <div class="todo__actions">
                     <chip class="todo__action" label="Add" @click="openDialog"/>
-                    <chip class="todo__action" label="Remove"/>
                 </div>
                 <div class="todo__container">
-                    <div v-for="todo in todos" :key="todo.id" class="todo">{{ todo.description }}</div>
+                    <div v-for="todo in todos" :key="todo._id" class="todo">
+                        <div class="todo__remove" @click="remove(todo._id)">X</div>
+                        {{ todo.description }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -34,8 +36,7 @@
 
 <script>
 import { Chip, Input, DialogButton } from 'design-system'
-import { mapGetters, mapState, mapActions } from 'vuex'
-import api from 'api-client'
+import { mapState, mapActions } from 'vuex'
 
 export default {
     components: {
@@ -64,25 +65,27 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['fetchAndSetTodos', 'setStudentId', 'setStudentIdSet']),
+        ...mapActions(['fetchAndSetTodos', 'postTodo', 'deleteTodo', 'setStudentId', 'setStudentIdSet']),
         openDialog () {
             this.isDialogShown = true
             setTimeout(() => {
                 this.$refs.input.focus()
             }, 250)
         },
-        post () {
+        async post () {
             if (!this.description.length) return
 
             const payload = { description: this.description }
-            return api
-                .post('todo/', payload)
-                .then(res => {
-                    this.fetchAndSetTodos()
-                    this.description = ''
-                    this.isDialogShown = false
-                })
-                .catch((err) => console.log(err))
+            const res = await this.postTodo(payload)
+            if (res) {
+                this.description = ''
+                this.isDialogShown = false
+            } else {
+                alert('Error in posting todo')
+            }
+        },
+        async remove (id) {
+            return await this.deleteTodo(id)
         }
     }
 }
@@ -106,6 +109,7 @@ export default {
 .iframe {
     background-color: @white;
     width: 100%;
+    margin-top: 64px;
     height: 460px;
 }
 
@@ -118,7 +122,15 @@ export default {
     margin: 16px;
     padding: 32px;
     box-sizing: border-box;
+    position: relative;
 
+    &__remove{
+        position: absolute;
+        color: @dolphin;
+        right: 8px;
+        top: 8px;
+        cursor: pointer;
+    }
     &__wrapper {
         overflow: scroll;
     }
@@ -132,7 +144,6 @@ export default {
     }
     &__container {
         display: flex;
-        margin: 0 -16px;
     }
     &__input {
         background-color: transparent;
