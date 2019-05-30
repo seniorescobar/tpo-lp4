@@ -4,7 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 const state = {
-    todos: [{ _id: '12312312', description: 'asdasdasd' }],
+    todos: [],
     studentId: null,
     isStudentIdSet: false,
 }
