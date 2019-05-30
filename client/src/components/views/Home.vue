@@ -143,7 +143,8 @@ export default {
         margin: 12px 0;
     }
     &__container {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
     }
     &__input {
         background-color: transparent;

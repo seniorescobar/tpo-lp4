@@ -1,6 +1,11 @@
 <template>
     <div id="main">
-        <div class="title">StraightAs</div>
+        <div class="header">
+            <div class="header__action" @click="logout">Log out</div>
+            <div class="header__title">StraightAs</div>
+            <div></div>
+        </div>
+
         <div class="navigation">
             <div v-for="tab in tabs" :key="tab.id" class="navigation__item" :class="getClass(tab.id) | prefix('navigation__item--')" @click="$router.push(tab.id)">{{ tab.label }}</div>
         </div>
@@ -25,6 +30,10 @@ export default {
             return {
                 active: tabId === this.$route.name
             }
+        },
+        logout () {
+            localStorage.removeItem("user")
+            this.$router.push('/login')
         }
     }
 }
@@ -33,11 +42,21 @@ export default {
 <style lang="less" scoped>
 @import '../../less/common';
 
-.title {
-    text-align: center;
-    line-height: 32px;
-    font-size: 22px;
-    margin: 8px 0;
+.header {
+    display: grid;
+    grid-template-columns: 100px 1fr 100px;
+    padding: 8px 0;
+
+    &__action {
+        text-decoration: underline;
+        text-align: center;
+        cursor: pointer;
+    }
+    &__title {
+        text-align: center;
+        line-height: 32px;
+        font-size: 22px;
+    }
 }
 
 .navigation {
