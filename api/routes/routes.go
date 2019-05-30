@@ -41,30 +41,30 @@ func initApiRoutes(r *mux.Router) {
 	todoRouter.Use(middleware.CheckUser)
 	todoRouter.HandleFunc("/", todo.List).Methods(http.MethodGet)
 	todoRouter.HandleFunc("/", todo.Add).Methods(http.MethodPost)
-	todoRouter.HandleFunc("/{id}", todo.Edit).Methods(http.MethodPut)
-	todoRouter.HandleFunc("/{id}", todo.Remove).Methods(http.MethodDelete)
+	todoRouter.HandleFunc("/{id}/", todo.Edit).Methods(http.MethodPut)
+	todoRouter.HandleFunc("/{id}/", todo.Remove).Methods(http.MethodDelete)
 
 	// calendar
 	calendarRouter := apiRouter.PathPrefix("/calendar-event/").Subrouter()
 	calendarRouter.Use(middleware.CheckUser)
 	calendarRouter.HandleFunc("/", calendar.List).Methods(http.MethodGet)
 	calendarRouter.HandleFunc("/", calendar.Add).Methods(http.MethodPost)
-	calendarRouter.HandleFunc("/{id}", calendar.Edit).Methods(http.MethodPut)
-	calendarRouter.HandleFunc("/{id}", calendar.Remove).Methods(http.MethodDelete)
+	calendarRouter.HandleFunc("/{id}/", calendar.Edit).Methods(http.MethodPut)
+	calendarRouter.HandleFunc("/{id}/", calendar.Remove).Methods(http.MethodDelete)
 
 	// timetable
 	timetableRouter := apiRouter.PathPrefix("/course/").Subrouter()
 	timetableRouter.Use(middleware.CheckUser)
 	timetableRouter.HandleFunc("/", timetable.List).Methods(http.MethodGet)
 	timetableRouter.HandleFunc("/", timetable.Add).Methods(http.MethodPost)
-	timetableRouter.HandleFunc("/{id}", timetable.Edit).Methods(http.MethodPut)
-	timetableRouter.HandleFunc("/{id}", timetable.Remove).Methods(http.MethodDelete)
+	timetableRouter.HandleFunc("/{id}/", timetable.Edit).Methods(http.MethodPut)
+	timetableRouter.HandleFunc("/{id}/", timetable.Remove).Methods(http.MethodDelete)
 
 	// event
 	eventRouter := apiRouter.PathPrefix("/event/").Subrouter()
 	eventRouter.Handle("/", middleware.Protect(http.HandlerFunc(event.List))).Methods(http.MethodGet)
 	eventRouter.Handle("/", middleware.CheckManager(http.HandlerFunc(event.Add))).Methods(http.MethodPost)
-	eventRouter.Handle("/{id}", middleware.CheckManager(http.HandlerFunc(event.Edit))).Methods(http.MethodPut)
-	eventRouter.Handle("/{id}", middleware.CheckManager(http.HandlerFunc(event.Remove))).Methods(http.MethodDelete)
+	eventRouter.Handle("/{id}/", middleware.CheckManager(http.HandlerFunc(event.Edit))).Methods(http.MethodPut)
+	eventRouter.Handle("/{id}/", middleware.CheckManager(http.HandlerFunc(event.Remove))).Methods(http.MethodDelete)
 
 }
