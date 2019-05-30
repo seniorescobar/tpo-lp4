@@ -21,6 +21,7 @@ func Register(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	u.Role = "user"
 
 	uNew, err := container.AuthService.Register(u)
 	if err != nil {
