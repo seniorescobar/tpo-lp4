@@ -22,7 +22,7 @@
     "less-loader": "^4.1.0",
     "lodash": "^4.17.11",
     "lodash.debounce": "^4.0.8",
-    "moment": "^2.22.2",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.23",
     "v-calendar": "^0.9.7",
     "vue": "^2.5.17",
